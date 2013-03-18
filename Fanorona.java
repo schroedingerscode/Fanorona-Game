@@ -18,6 +18,7 @@ public class Fanorona extends JPanel
 	
 	private JButton newGameButton;  
 	private JButton instructionsButton; 
+	private JButton nameButton;
 	private JLabel message;  
    
 	public Fanorona() 
@@ -29,11 +30,13 @@ public class Fanorona extends JPanel
 		add(grid);
 		add(newGameButton);
 		add(instructionsButton);	
+		add(nameButton);
 		add(message);
 		      		      
 		grid.setBounds(1,51,1000,600); 
 		newGameButton.setBounds(10, 10, 120, 30);
 		instructionsButton.setBounds(140, 10, 120, 30);
+		nameButton.setBounds(870, 10, 120, 30);
 		message.setBounds(300, 10, 350, 30);
 	} 
 	
@@ -59,7 +62,9 @@ public class Fanorona extends JPanel
 		boolean playing; 
 		      
 		int currentPlayer; // NORTH_PLAYER / SOUTH_PLAYER
-		      
+		
+		String playerName;
+		
 		int selectedRow, selectedCol;  
 		
 		FanoronaMove[] validMoves;  
@@ -72,6 +77,8 @@ public class Fanorona extends JPanel
 			instructionsButton.addActionListener(this);
 			newGameButton = new JButton("New Game");
 			newGameButton.addActionListener(this);
+			nameButton = new JButton("Change Name");
+			nameButton.addActionListener(this);
 			message = new JLabel("",JLabel.CENTER);
 			message.setFont(new  Font("Serif", Font.BOLD, 14));
 			message.setForeground(Color.BLACK);
@@ -82,10 +89,12 @@ public class Fanorona extends JPanel
 		public void actionPerformed(ActionEvent evt) 
 		{
 			Object src = evt.getSource();
-			if (src == newGameButton)
+			if(src == newGameButton)
 				newGame();
-			else if (src == instructionsButton)
+			else if(src == instructionsButton)
 				instructions();
+			else if(src == nameButton)
+				changeName();
 		}
 	
 		// new game
@@ -106,8 +115,7 @@ public class Fanorona extends JPanel
 	//		newGameButton.setEnabled(false);
 	//		instructionsButton.setEnabled(true);
 			repaint();
-		}
-	      
+		}		      
 	      
 		//instructions for Fanorona
 		void instructions() 
@@ -129,6 +137,12 @@ public class Fanorona extends JPanel
 			JOptionPane.showMessageDialog(this, instructionDialog, "Fanorona Instructions", JOptionPane.PLAIN_MESSAGE);
 		}
 
+		void changeName()
+		{
+			playerName = JOptionPane.showInputDialog(null, "Enter player name: ", "", JOptionPane.PLAIN_MESSAGE);
+			message.setText("Player name is: " + playerName);
+		}
+		
 		void gameOver(String str) 
 		{
 			message.setText(str);
