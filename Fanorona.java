@@ -160,9 +160,9 @@ public class Fanorona extends JPanel
 //					selectedRow = x;
 //					selectedCol = y;
 //					if (currentPlayer == FanoronaData.SOUTH_PLAYER)
-//						message.setText("RED:  Make your move.");
+//						message.setText("SOUTH_PLAYER:  Make your move.");
 //					else
-//						message.setText("BLACK:  Make your move.");
+//						message.setText("NORTH_PLAYER:  Make your move.");
 //					repaint();
 //					return;
 //				}
@@ -269,8 +269,8 @@ public class Fanorona extends JPanel
 				{
 					if(y < 2)
 					{
-			//			g.setColor(Color.RED);
-			//			g.fillOval(100*x+55, 100*y+55, 90, 90);
+						g.setColor(Color.BLACK);
+						g.fillOval(100*x+55, 100*y+55, 90, 90);
 						g.setColor(Color.BLACK);
 						g.fillOval(100*x+58, 100*y+58, 84, 84);
 					}
@@ -278,8 +278,8 @@ public class Fanorona extends JPanel
 					{
 						if(count == 0 || count == 2 || count == 5 || count == 7)
 						{
-				//			g.setColor(Color.RED);
-				//			g.fillOval(100*x+55, 100*y+55, 90, 90);
+							g.setColor(Color.BLACK);
+							g.fillOval(100*x+55, 100*y+55, 90, 90);
 							g.setColor(Color.BLACK);
 							g.fillOval(100*x+58, 100*y+58, 84, 84);
 						}			
@@ -315,17 +315,17 @@ public class Fanorona extends JPanel
 	      
 		public void mousePressed(MouseEvent click) 
 		{
-			message.setText("Location clicked: " + click.getX() + ", " + click.getY());
+//			message.setText("Location clicked: " + click.getX() + ", " + click.getY());
 			if (playing == false)
 				message.setText("Click \"New Game\" to start a new game.");
 			else 
 			{
 				//formula for determing circle clicked
-//				int x = (click.getX() - 2) / 20;
-//				int y = (click.getY() - 2) / 20;
+				int x = (click.getX()+50) / 100;
+				int y = (click.getY()+50) / 100;
 //				if (x >= 0 && x < 9 && y >= 0 && y < 5)
 //					doClick(x,y);
-				
+				message.setText("Grid Location clicked: " + x + ", " + y);				
 				// ON THIS PART A2089RJ0QFJQ39JQ309J093409RQ3)(!*!)!@#*(
 			}
 		}
