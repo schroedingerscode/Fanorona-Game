@@ -118,6 +118,20 @@ public class Grid {
         addPiece(true, new Point(8,4));
     }
 
+    public int[][] getState() {
+	//returns a 2d array explaining the contents of each grid space
+	//to be used by the AI. 1 = player, 0 = empty, -1 = enemy
+    	int[][] state = new int[9][5];
+	for(Piece p : playerPieces) {
+		state[p.x][p.y] = 1;
+	}
+	for(Piece p : enemyPieces) {
+		state[p.x][p.y] = -1;
+	}
+	//all other spaces were initialized to o
+	return state;
+    }
+
     public void resetGrid() {
         clearGrid();
         placePiecesInInitBoardState();

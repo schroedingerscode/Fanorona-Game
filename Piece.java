@@ -4,6 +4,7 @@
 import java.awt.Point;
 
 public class Piece extends Point {
+    Point position() { return new Point(x,y); }
     Piece(Point pt) { super(pt); }
     Piece(int x, int y) { super(x, y); }
 }
