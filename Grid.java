@@ -3,18 +3,23 @@
 //The y-axis is inverted so (0,0) is in the top left.
 //The x-axis is normal.
 
-import java.awt.Point;
+import java.awt.*;
+import javax.swing.*;
 import java.util.*;
 
-public class Grid {
-    private List<Piece> playerPieces;
-    private List<Piece> enemyPieces;
+public class Grid extends JPanel{
+    private java.util.List<Piece> playerPieces;
+    private java.util.List<Piece> enemyPieces;
+    
     private int MIN_GRID_WIDTH_INDEX = 0;
     private int MAX_GRID_WIDTH_INDEX = 8;
     private int MIN_GRID_HEIGHT_INDEX = 0;
     private int MAX_GRID_HEIGHT_INDEX = 4;
+    static public int SQ_W  = 100; //Square width
+    static public int SQ_H  = 100; //Square height
+    private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
+    private int MAXH = (MAX_GRID_HEIGHT_INDEX) * SQ_H;
 
-    //!!!WARNING UNTESTED
     private Boolean isUnique(Point coor) {
         for(Piece p : playerPieces) {
             if(p.position().equals(coor)) { return false; }
@@ -40,22 +45,23 @@ public class Grid {
     }
 
     private Boolean addPiece(Boolean isAlly, Point coor) {
+        //no gfx here, the drawing function goes off of stored data
         if(!isValidPosition(coor)) { return false; }
 
+        Piece p = new Piece(coor, isAlly);
         if(isAlly) {
-            playerPieces.add(new Piece(coor));
+            playerPieces.add(p);
         } else {
-            enemyPieces.add(new Piece(coor));
+            enemyPieces.add(p);
         }
         return true;
     }
 
-    private void clearGrid() {
+    private void clearGridData() {
         playerPieces = new ArrayList<Piece>();
         enemyPieces = new ArrayList<Piece>();
     }
 
-    //!!!WARNING UNTESTED
     private void placePiecesInInitBoardState() {
         //use resetGrid() for external calls
         //assumes the standard 9x5 board & no addPiece() errors
@@ -119,23 +125,91 @@ public class Grid {
     }
 
     public int[][] getState() {
-	//returns a 2d array explaining the contents of each grid space
-	//to be used by the AI. 1 = player, 0 = empty, -1 = enemy
-    	int[][] state = new int[9][5];
-	for(Piece p : playerPieces) {
-		state[p.x][p.y] = 1;
-	}
-	for(Piece p : enemyPieces) {
-		state[p.x][p.y] = -1;
-	}
-	//all other spaces were initialized to o
-	return state;
+        //returns a 2d array explaining the contents of each grid space
+        //to be used by the AI. 1 = player, 0 = empty, -1 = enemy
+        int[][] state = new int[9][5]; //x,y
+        for(Piece p : playerPieces) {
+            state[p.position().x][p.position().y] = 1;
+        }
+        for(Piece p : enemyPieces) {
+            state[p.position().x][p.position().y] = -1;
+        }
+        //all other spaces were initialized to 0
+        return state;
     }
 
-    public void resetGrid() {
-        clearGrid();
+    public void reset() {
+        clearGridData();
         placePiecesInInitBoardState();
+        repaint();
     }
 
-    public Grid() { resetGrid(); }
+    public Grid() { 
+        super(); 
+        reset(); 
+    }
+
+    public void paintComponent(Graphics g) {					
+        super.paintComponent(g);
+        this.setBackground(new Color(0x002277));
+        g.drawRect(0, 0, getSize().width-1, getSize().height-1);
+                    
+        int xBorder = SQ_W;
+        int yBorder = SQ_H;
+        //draw column separators
+        for(int x = MIN_GRID_WIDTH_INDEX; x < MAX_GRID_WIDTH_INDEX + 1; x++) {
+            int globalX = (int) (SQ_W*(x+1));
+            g.drawLine(globalX+1, yBorder, globalX + 1,yBorder + MAXH);
+            g.drawLine(globalX+0, yBorder, globalX,    yBorder + MAXH);
+            g.drawLine(globalX-1, yBorder, globalX - 1,yBorder + MAXH);
+        }
+    
+        //draw row separators
+        for(int y = MIN_GRID_HEIGHT_INDEX; y < MAX_GRID_HEIGHT_INDEX + 1; y++) {
+            int globalY = (int) (SQ_H*(y+1));
+            g.drawLine(xBorder, globalY + 1, xBorder+MAXW, globalY + 1);
+            g.drawLine(xBorder, globalY,     xBorder+MAXW, globalY);
+            g.drawLine(xBorder, globalY - 1, xBorder+MAXW, globalY - 1);
+        }
+
+        //TODO JOSH or NAM, make diagonals NOT hardcoded
+        //diagonals, TL to BR
+        g.drawLine(100, 300, 300, 500);
+        g.drawLine(100, 100, 500, 500);
+        g.drawLine(300, 100, 700, 500);
+        g.drawLine(500, 100, 900, 500);
+        g.drawLine(700, 100, 900, 300);
+        
+        //diagonals, TR to BL
+        g.drawLine(100, 300, 300, 100);
+        g.drawLine(100, 500, 500, 100);
+        g.drawLine(300, 500, 700, 100);
+        g.drawLine(500, 500, 900, 100);
+        g.drawLine(700, 500, 900, 300);
+
+        //draw pieces based on stored data
+        for(Piece p : playerPieces) {
+            p.drawPiece(g);
+        }
+        for(Piece p : enemyPieces) {
+            p.drawPiece(g);
+        }
+
+        //???
+        //if (playing) {
+        //	setColor(Color.cyan);
+        //	
+        //	if (selectedRow >= 0) {
+        //		message.setText("selected row: " + selectedRow);
+        //	}
+        //}
+    }  
+
+    public Boolean movePiece(Point a, Point b) {
+        //returns success or failure
+
+        //TODO somebody - write the function
+
+        return true;
+    }
 }
