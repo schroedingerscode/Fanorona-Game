@@ -4,6 +4,7 @@
 //The x-axis is normal.
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 import javax.swing.*;
 import java.util.*;
 
@@ -19,6 +20,8 @@ public class Grid extends JPanel{
     static public int SQ_H  = 100; //Square height
     private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
     private int MAXH = (MAX_GRID_HEIGHT_INDEX) * SQ_H;
+
+    Image bkg;
 
     private Boolean isUnique(Point coor) {
         for(Piece p : playerPieces) {
@@ -146,64 +149,66 @@ public class Grid extends JPanel{
 
     public Grid() { 
         super(); 
+
+        //load background image
+        //assumes "cherry.png" is in the same directory as the .class files
+        ImageIcon ii = new ImageIcon(this.getClass().getResource("cherry.png"));
+        bkg = ii.getImage();
+
         reset(); 
     }
 
-    public void paintComponent(Graphics g) {					
-        super.paintComponent(g);
-        this.setBackground(new Color(0x002277));
-        g.drawRect(0, 0, getSize().width-1, getSize().height-1);
-                    
+    private void drawGridLines(Graphics2D g2d) {//{{{
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(5)); //line width
         int xBorder = SQ_W;
         int yBorder = SQ_H;
         //draw column separators
         for(int x = MIN_GRID_WIDTH_INDEX; x < MAX_GRID_WIDTH_INDEX + 1; x++) {
             int globalX = (int) (SQ_W*(x+1));
-            g.drawLine(globalX+1, yBorder, globalX + 1,yBorder + MAXH);
-            g.drawLine(globalX+0, yBorder, globalX,    yBorder + MAXH);
-            g.drawLine(globalX-1, yBorder, globalX - 1,yBorder + MAXH);
+            g2d.draw(new Line2D.Float(globalX+0, yBorder, globalX,    yBorder + MAXH));
         }
     
         //draw row separators
         for(int y = MIN_GRID_HEIGHT_INDEX; y < MAX_GRID_HEIGHT_INDEX + 1; y++) {
             int globalY = (int) (SQ_H*(y+1));
-            g.drawLine(xBorder, globalY + 1, xBorder+MAXW, globalY + 1);
-            g.drawLine(xBorder, globalY,     xBorder+MAXW, globalY);
-            g.drawLine(xBorder, globalY - 1, xBorder+MAXW, globalY - 1);
+            g2d.draw(new Line2D.Float(xBorder, globalY + 0, xBorder+MAXW, globalY + 0));
         }
 
+        g2d.setStroke(new BasicStroke(3)); //line width
         //TODO JOSH or NAM, make diagonals NOT hardcoded
         //diagonals, TL to BR
-        g.drawLine(100, 300, 300, 500);
-        g.drawLine(100, 100, 500, 500);
-        g.drawLine(300, 100, 700, 500);
-        g.drawLine(500, 100, 900, 500);
-        g.drawLine(700, 100, 900, 300);
+        g2d.draw(new Line2D.Float(100, 300, 300, 500));
+        g2d.draw(new Line2D.Float(100, 100, 500, 500));
+        g2d.draw(new Line2D.Float(300, 100, 700, 500));
+        g2d.draw(new Line2D.Float(500, 100, 900, 500));
+        g2d.draw(new Line2D.Float(700, 100, 900, 300));
         
         //diagonals, TR to BL
-        g.drawLine(100, 300, 300, 100);
-        g.drawLine(100, 500, 500, 100);
-        g.drawLine(300, 500, 700, 100);
-        g.drawLine(500, 500, 900, 100);
-        g.drawLine(700, 500, 900, 300);
+        g2d.draw(new Line2D.Float(100, 300, 300, 100));
+        g2d.draw(new Line2D.Float(100, 500, 500, 100));
+        g2d.draw(new Line2D.Float(300, 500, 700, 100));
+        g2d.draw(new Line2D.Float(500, 500, 900, 100));
+        g2d.draw(new Line2D.Float(700, 500, 900, 300));
+    }//}}}
+
+    public void paintComponent(Graphics g) {//{{{
+        super.paintComponent(g);
+
+        //draw background, 
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.drawImage(bkg, 0, 0, null);
+                    
+        drawGridLines(g2d);
 
         //draw pieces based on stored data
         for(Piece p : playerPieces) {
-            p.drawPiece(g);
+            p.drawPiece(g2d);
         }
         for(Piece p : enemyPieces) {
-            p.drawPiece(g);
+            p.drawPiece(g2d);
         }
-
-        //???
-        //if (playing) {
-        //	setColor(Color.cyan);
-        //	
-        //	if (selectedRow >= 0) {
-        //		message.setText("selected row: " + selectedRow);
-        //	}
-        //}
-    }  
+    }  //}}}
 
     public Boolean movePiece(Point a, Point b) {
         //returns success or failure
