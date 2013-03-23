@@ -19,6 +19,8 @@ public class StateMachine {
 		grid = new Grid();  
     }//}}}
 
+    public State getState() { return s; }
+
     public void run(String evtType, Point p) {//{{{
         //advance the state
         if(evtType == "GameOver") {
