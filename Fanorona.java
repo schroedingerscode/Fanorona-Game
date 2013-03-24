@@ -86,7 +86,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
     void changeName() {//{{{
         playerName = JOptionPane.showInputDialog(null, "Enter player name: ", "", JOptionPane.PLAIN_MESSAGE);
-        message.setText("Player name is: " + playerName);
+        if(playerName != null)
+        	message.setText("Player name is: " + playerName);
     }//}}}
 
     void instructions() {//{{{

@@ -20,7 +20,8 @@ public class Grid extends JPanel{
     static public int SQ_H  = 100; //Square height
     private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
     private int MAXH = (MAX_GRID_HEIGHT_INDEX) * SQ_H;
-
+    private int movesRemaining;
+    
     Image bkg;
 
     static public Point asGridCoor(Point scrCoor) {//{{{
@@ -41,6 +42,7 @@ public class Grid extends JPanel{
         //assumes "cherry.png" is in the same directory as the .class files
         ImageIcon ii = new ImageIcon(this.getClass().getResource("cherry.png"));
         bkg = ii.getImage();
+        movesRemaining = 50;
 
         reset(); 
     }//}}}
@@ -54,6 +56,7 @@ public class Grid extends JPanel{
     //TODO somebody - write the function
     public void movePiece(Point a, Point b) {//{{{
         //returns success or failure
+    	movesRemaining--;
     }//}}}
 
     public int[][] getState() {//{{{
@@ -66,6 +69,10 @@ public class Grid extends JPanel{
         for(Piece p : enemyPieces) {
             state[p.position().x][p.position().y] = -1;
         }
+        
+        //check moves remaining
+        if(movesRemaining <= 0)
+        	this.loseMessage();
         //all other spaces were initialized to 0
         return state;
     }//}}}
@@ -266,4 +273,14 @@ public class Grid extends JPanel{
         addPiece(true, new Point(7,4));
         addPiece(true, new Point(8,4));
     }//}}}
+    
+    public void winMessage()
+    {
+    	JOptionPane.showMessageDialog(this, "Winner", "Congradulations, You Won!", JOptionPane.PLAIN_MESSAGE);
+    }
+    
+    public void loseMessage()
+    {
+    	JOptionPane.showMessageDialog(this, "Loser", "You Lose", JOptionPane.PLAIN_MESSAGE);
+    }
 }

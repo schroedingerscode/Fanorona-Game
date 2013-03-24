@@ -6,6 +6,7 @@ import java.util.*;
 public class StateMachine {
     public Grid grid;
     private State s;
+    private int win; // 0 - playing, 1 - win, 2 - lose
 
     //data valid only in certain states
     private Piece selectedPiece;
@@ -17,6 +18,7 @@ public class StateMachine {
         setState(State.GAME_OVER);
         //selectedPiece is not valid until MOVE states
 		grid = new Grid();  
+		win = 0;
     }//}}}
 
     public State getState() { return s; }
@@ -119,4 +121,13 @@ public class StateMachine {
 
     //TODO somebody - write it
     private int getDirection(Point a, Point b) { return 0; }
+
+    private void gameFinished()
+    {
+    	if(win == 1)
+    		grid.winMessage();
+    	else if(win == 2)
+    		grid.loseMessage();
+    	else;
+    }
 }
