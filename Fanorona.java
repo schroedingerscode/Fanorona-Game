@@ -10,9 +10,13 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JButton newGameButton;  
 	private JButton instructionsButton; 
 	private JButton nameButton;
+	private JButton aiButton;
 	private JLabel messageBox;  
 
     String playerName;
+    Boolean aiIsOn;
+
+    AI ai;
 
 	public static void main(String[] args) {//{{{
         //setup game window
@@ -33,12 +37,16 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		add(stateMachine.grid);
 		stateMachine.grid.setBounds(1,51,1000,600); 
 
+        ai = new AI();
+        aiIsOn = false;
+
         initButtons();
 
         //add listeners
         instructionsButton.addActionListener(this);
         newGameButton.addActionListener(this);
         nameButton.addActionListener(this);
+        aiButton.addActionListener(this);
         addMouseListener(this);
 
         String message = stateMachine.run("NewGame", null);
@@ -48,17 +56,20 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     public void initButtons() {//{{{
         instructionsButton = new JButton("Instructions");
         newGameButton = new JButton("New Game");
+        aiButton = new JButton("Toggle AI");
         nameButton = new JButton("Change Name");
         messageBox = new JLabel("",JLabel.CENTER);
         messageBox.setFont(new  Font("Serif", Font.BOLD, 14));
         messageBox.setForeground(Color.BLACK);
 
 		add(newGameButton);
+        add(aiButton);
 		add(instructionsButton);	
 		add(nameButton);
 		add(messageBox);
 
 		newGameButton.setBounds(10, 10, 120, 30);
+		aiButton.setBounds(740, 10, 120, 30);
 		instructionsButton.setBounds(140, 10, 120, 30);
 		nameButton.setBounds(870, 10, 120, 30);
 		messageBox.setBounds(300, 10, 350, 30);
@@ -72,6 +83,23 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         //possibly TODO somebody: right-clicks as cancellation
         String message = stateMachine.run("Click", evt.getPoint());
         messageBox.setText(message);
+
+        //start AI on transition to enemy turn
+        runAI();
+    }//}}}
+
+    public void runAI() {//{{{
+        //if at state of AI turn
+        if(aiIsOn && (stateMachine.getState() == State.ENEMY_SELECT)) {
+            //get the move from AI
+            ArrayList<Point> points = ai.getMove(stateMachine.grid.getState());
+
+            //feed all the points to the state machine
+            for(Point p : points) {
+                String message = stateMachine.run("Click", p);
+                messageBox.setText(message);
+            }
+        }
     }//}}}
 
     public void actionPerformed(ActionEvent evt) {//{{{
@@ -83,7 +111,16 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
             instructions();
         } else if(src == nameButton) {
             changeName();
+        } else if(src == aiButton) {
+            if(stateMachine.isPlayerTurn()) {
+                aiIsOn = !aiIsOn; //toggle
+                String aiState = aiIsOn?"on":"off";
+                JOptionPane.showMessageDialog(this, "AI is now " + aiState + ".", "AI toggle", JOptionPane.PLAIN_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Can only toggle AI during the white player's turn.", "AI toggle", JOptionPane.PLAIN_MESSAGE);
+            }
         }
+        
     }//}}}
 
     void changeName() {//{{{

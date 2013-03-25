@@ -159,6 +159,14 @@ public class StateMachine {
         grid.movePiece(selectedPiece.position(), pt);
     }//}}}
 
+    public Boolean isPlayerTurn() {//{{{
+        //order dependent
+        if(s == State.PLAYER_SELECT) { return true; }
+        if(s == State.ENEMY_SELECT) { return false; }
+        if(selectedPiece.isPlayer()) { return true; }
+        /*else*/ return false;
+    }//}}}
+
     //private void gameFinished() {
     //	if(win == 1)
     //		grid.winMessage();
