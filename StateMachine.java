@@ -78,15 +78,19 @@ public class StateMachine {
         //figure out if it is a space:0, ally piece:1, or enemy:-1
         int id = grid.getState()[pt.x][pt.y];
 
+        System.out.println("Clicked: " + pt.x + ", " + pt.y);
+        
         switch(s) {
             case PLAYER_SELECT:
                 if(id == 1) { 
+                	System.out.println("PLAYER_SELECT");
                     selectPiece(pt);
                     setState(State.MOVE);
                 } //else do nothing
                 break;
             case ENEMY_SELECT:
                 if(id == -1) { 
+                	System.out.println("ENEMY_SELECT");
                     selectPiece(pt);
                     setState(State.MOVE);
                 } //else do nothing
@@ -94,6 +98,7 @@ public class StateMachine {
             case MOVE:
                 if(id == 0) {
                     if (grid.isValidMove(selectedPiece.position(), pt)) {
+                    	System.out.println("MOVE");
                         this.movePiece(pt);
                         handleChainedMove(); //sets next state
                     } //else do nothing
@@ -102,12 +107,14 @@ public class StateMachine {
             case MOVE_AGAIN:
                 if(id == 0) {
                     if(grid.isValidDoubleMove(selectedPiece.position(), pt, prevPositions, prevDirection)) {
+                    	System.out.println("MOVE AGAIN");
                         this.movePiece(pt);
                         handleChainedMove(); //sets next state
                     }
                     //no option to cancel or decline to move yet
                 }
                 break;
+            //the other states do not respond to "Click" events
         }
     }//}}}
 
@@ -119,6 +126,7 @@ public class StateMachine {
 
     private void handleChainedMove() {//{{{
         if(grid.canMoveAgain(selectedPiece.position(), prevPositions, prevDirection)) {
+            grid.multiTurnMessage();
             setState(State.MOVE_AGAIN); 
         } else {
             if(selectedPiece.isPlayer()) {
@@ -142,7 +150,7 @@ public class StateMachine {
     }//}}}
 
     private void movePiece(Point pt) {//{{{
-        selectedPiece.unhighlight();
+        grid.getPieceAt(selectedPiece.position()).unhighlight();
         grid.repaint(); //technically redundant as you movePiece soon
 
         Point oldPt = selectedPiece.position();
@@ -151,9 +159,6 @@ public class StateMachine {
         grid.movePiece(selectedPiece.position(), pt);
     }//}}}
 
-    //TODO somebody - write it
-    private int getDirection(Point a, Point b) { return 0; }
-
     //private void gameFinished() {
     //	if(win == 1)
     //		grid.winMessage();
@@ -161,4 +166,62 @@ public class StateMachine {
     //		grid.loseMessage();
     //	else;
     //}
+
+    //0-7 (assuming points are adjacent)
+    //0: N, 1: NE, 2: E, 3: SE, 
+    //4: S, 5: SW, 6: W, 7: NW 
+    private int getDirection(Point a, Point b) { //{{{
+    	if(a.x == b.x && a.y - 1 == b.y)
+    		return 0;
+    	else if(a.x + 1 == b.x && a.y - 1 == b.y)
+    		return 1;
+    	else if(a.x + 1 == b.x && a.y == b.y)
+    		return 2;
+    	else if(a.x + 1 == b.x && a.y + 1 == b.y)
+    		return 3;
+    	else if(a.x == b.x && a.y + 1 == b.y)
+    		return 4;
+    	else if(a.x - 1 == b.x && a.y + 1 == b.y)
+    		return 5;
+    	else if(a.x - 1 == b.x && a.y == b.y)
+    		return 6;
+    	else if(a.x - 1 == b.x && a.y - 1 == b.y)
+    		return 7;
+    	else
+    		return -1; 
+    }//}}}
+    
+    private Point getPointInDirection(Point a, int direction) {//{{{
+    	Point p;
+    	switch(direction) {
+    		case 0: 
+    			p = new Point(a.x, a.y-1);
+    			break;
+    		case 1:
+    			p = new Point(a.x+1, a.y-1);
+    			break;
+    		case 2:
+    			p = new Point(a.x+1, a.y);
+    			break;
+    		case 3: 
+    			p = new Point(a.x+1, a.y+1);
+    			break;
+    		case 4:
+    			p = new Point(a.x, a.y+1);
+    			break;
+    		case 5: 
+    			p = new Point(a.x-1, a.y+1);
+    			break;
+    		case 6:
+    			p = new Point(a.x-1, a.y);
+    			break;
+    		case 7:
+    			p = new Point(a.x-1, a.y-1);
+    			break;
+    		default:
+    			p = null;
+    			break;
+    	}    	
+    	return p;
+    }//}}}
 }

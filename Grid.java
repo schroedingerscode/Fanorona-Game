@@ -7,11 +7,14 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import javax.swing.*;
 import java.util.*;
+import java.util.List;
 
 public class Grid extends JPanel{
-    private java.util.List<Piece> playerPieces;
-    private java.util.List<Piece> enemyPieces;
+    private List<Piece> playerPieces;
+    private List<Piece> enemyPieces;
     
+    // 0 <= width <= 13 (must be odd)
+    // 0 <= height <= 13 (must be odd)
     private int MIN_GRID_WIDTH_INDEX = 0;
     private int MAX_GRID_WIDTH_INDEX = 8;
     private int MIN_GRID_HEIGHT_INDEX = 0;
@@ -54,6 +57,7 @@ public class Grid extends JPanel{
     //TODO somebody - write the function
     public void movePiece(Point a, Point b) {//{{{
         //assumes you already checked that the move was valid
+    	getPieceAt(a).move(b);
     }//}}}
 
     public int[][] getState() {//{{{
@@ -66,7 +70,6 @@ public class Grid extends JPanel{
         for(Piece p : enemyPieces) {
             state[p.position().x][p.position().y] = -1;
         }
-        
         //all other spaces were initialized to 0
         return state;
     }//}}}
@@ -91,7 +94,7 @@ public class Grid extends JPanel{
         //draw column separators
         for(int x = MIN_GRID_WIDTH_INDEX; x < MAX_GRID_WIDTH_INDEX + 1; x++) {
             int globalX = (int) (SQ_W*(x+1));
-            g2d.draw(new Line2D.Float(globalX+0, yBorder, globalX,    yBorder + MAXH));
+            g2d.draw(new Line2D.Float(globalX+0, yBorder, globalX, yBorder + MAXH));
         }
     
         //draw row separators
@@ -102,12 +105,31 @@ public class Grid extends JPanel{
 
         g2d.setStroke(new BasicStroke(3)); //line width
         //TODO JOSH or NAM, make diagonals NOT hardcoded
+        //working on this:
+/*        if(MAX_GRID_WIDTH_INDEX > MAX_GRID_HEIGHT_INDEX) {
+    		for(int x = MIN_GRID_WIDTH_INDEX + 1; x <= (MAX_GRID_WIDTH_INDEX+1) / 2; x += 2) {
+    			g2d.draw(new Line2D.Float(x*100, (MIN_GRID_HEIGHT_INDEX+1)*100, (x+(MAX_GRID_WIDTH_INDEX/2))*100, (MAX_GRID_HEIGHT_INDEX+1)*100));
+    		}
+    	}
+        
+        else if(MAX_GRID_WIDTH_INDEX == MAX_GRID_HEIGHT_INDEX) {
+        	for(int x = MIN_GRID_WIDTH_INDEX + 1; x < MAX_GRID_WIDTH_INDEX / 2; x += 2) {
+    			g2d.draw(new Line2D.Float(x*100, MIN_GRID_HEIGHT_INDEX, (x+4)*100, MAX_GRID_HEIGHT_INDEX));
+    		}
+        }
+        
+        else {
+        	for(int x = MIN_GRID_WIDTH_INDEX + 1; x < MAX_GRID_WIDTH_INDEX / 2; x += 2) {
+    			g2d.draw(new Line2D.Float(x*100, MIN_GRID_HEIGHT_INDEX, (x+4)*100, MAX_GRID_HEIGHT_INDEX));
+    		}
+        }*/
+        
         //diagonals, TL to BR
         g2d.draw(new Line2D.Float(100, 300, 300, 500));
         g2d.draw(new Line2D.Float(100, 100, 500, 500));
         g2d.draw(new Line2D.Float(300, 100, 700, 500));
         g2d.draw(new Line2D.Float(500, 100, 900, 500));
-        g2d.draw(new Line2D.Float(700, 100, 900, 300));
+        g2d.draw(new Line2D.Float(700, 100, 900, 300)); 
         
         //diagonals, TR to BL
         g2d.draw(new Line2D.Float(100, 300, 300, 100));
@@ -157,14 +179,46 @@ public class Grid extends JPanel{
         return true;
     }//}}}
 
-    //TODO, tricky because of intermittent diagonals
-    public Boolean isAdjacent(Point a, Point b) { return true; }
+    //Points where both x and y are odd or even results in 8 adjacent locations
+    //Points where x and y are not both odd or even results in only 4 adjacent locations
+    //This function only checks for ADJACENT locations (even if out of bounds)
+    //isValidMoves checks bounded points
+    public Boolean isAdjacent(Point a, Point b) {
+    	List<Point> adjacentPoints = new ArrayList<Point>();
+    	adjacentPoints.add(new Point(a.x, a.y + 1));
+		adjacentPoints.add(new Point(a.x, a.y - 1));
+		adjacentPoints.add(new Point(a.x + 1, a.y));
+		adjacentPoints.add(new Point(a.x - 1, a.y));
+    	adjacentPoints.add(new Point(a.x + 1, a.y + 1));
+		adjacentPoints.add(new Point(a.x + 1, a.y - 1));
+		adjacentPoints.add(new Point(a.x - 1, a.y + 1));
+		adjacentPoints.add(new Point(a.x - 1, a.y - 1));
+    	if((a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0)) {    		
+    		for(int n = 0; n < adjacentPoints.size(); n++) {
+    			if(adjacentPoints.get(n) == b)
+    				return true;
+    			else 
+    				return false;
+    		}
+    	}
+    	else {
+    		for(int n = 0; n < adjacentPoints.size() / 2; n++) {
+    			if(adjacentPoints.get(n) == b)
+    				return true;
+    			else 
+    				return false;
+    		}
+    	}
+    	return false;
+    }
 
     //WARNING Not functional until isAdjacent is written & the restriction works
     public Boolean isValidMove(Point a, Point b) {//{{{
         //restrictions:
         //  must capture if possible
-        return isAdjacent(a,b) && isOnGrid(b);
+    	System.out.println("Valid move: " + (isAdjacent(a,b) && isOnGrid(b)));
+        //return isAdjacent(a,b) && isOnGrid(b);
+        return true; //TEMP TODO remove line
     }//}}}
 
     //TODO someone - write it
@@ -182,10 +236,11 @@ public class Grid extends JPanel{
 
     //TODO someone - write it
     public Boolean canMoveAgain(Point a, java.util.List<Point> prevPositions, int prevDirection) {//{{{
+        Boolean canMoveAgain = false;
         //per(empty adjacent space) {
         //  if(isValidDoubleMove(stuff)) { return true; }
         //}
-        return false;
+        return canMoveAgain;
     }//}}}
 
     private Boolean addPiece(Boolean isAlly, Point coor) {//{{{
@@ -200,6 +255,16 @@ public class Grid extends JPanel{
         }
         return true;
     }//}}}
+    
+    private Boolean deletePiece(Point coor) {
+        if(!(isOnGrid(coor) && isUnique(coor))) { return false; }
+    	Piece p = getPieceAt(coor);
+    	if(p.color)
+    		playerPieces.remove(p);
+    	else
+    		enemyPieces.remove(p);
+    	return true;
+    }
 
     private void clearGridData() {//{{{
         playerPieces = new ArrayList<Piece>();
@@ -212,67 +277,42 @@ public class Grid extends JPanel{
         //it is highly likely that this requirement will be changed by the
         //instructor in the future 
 
-        //top row (row 0)
-        addPiece(false, new Point(0,0));
-        addPiece(false, new Point(1,0));
-        addPiece(false, new Point(2,0));
-        addPiece(false, new Point(3,0));
-        addPiece(false, new Point(4,0));
-        addPiece(false, new Point(5,0));
-        addPiece(false, new Point(6,0));
-        addPiece(false, new Point(7,0));
-        addPiece(false, new Point(8,0));
-
-        //row 1
-        addPiece(false, new Point(0,1));
-        addPiece(false, new Point(1,1));
-        addPiece(false, new Point(2,1));
-        addPiece(false, new Point(3,1));
-        addPiece(false, new Point(4,1));
-        addPiece(false, new Point(5,1));
-        addPiece(false, new Point(6,1));
-        addPiece(false, new Point(7,1));
-        addPiece(false, new Point(8,1));
-
-        //row 2, mixed colors
-        addPiece(false, new Point(0,2));
-        addPiece(true, new Point(1,2));
-        addPiece(false, new Point(2,2));
-        addPiece(true, new Point(3,2));
-
-        addPiece(false, new Point(5,2));
-        addPiece(true, new Point(6,2));
-        addPiece(false, new Point(7,2));
-        addPiece(true, new Point(8,2));
-
-        //row 3
-        addPiece(true, new Point(0,3));
-        addPiece(true, new Point(1,3));
-        addPiece(true, new Point(2,3));
-        addPiece(true, new Point(3,3));
-        addPiece(true, new Point(4,3));
-        addPiece(true, new Point(5,3));
-        addPiece(true, new Point(6,3));
-        addPiece(true, new Point(7,3));
-        addPiece(true, new Point(8,3));
-
-        //row 4
-        addPiece(true, new Point(0,4));
-        addPiece(true, new Point(1,4));
-        addPiece(true, new Point(2,4));
-        addPiece(true, new Point(3,4));
-        addPiece(true, new Point(4,4));
-        addPiece(true, new Point(5,4));
-        addPiece(true, new Point(6,4));
-        addPiece(true, new Point(7,4));
-        addPiece(true, new Point(8,4));
+        //soft coding of adding pieces
+    	int count = 0;
+    	for(int x = MIN_GRID_WIDTH_INDEX; x <= MAX_GRID_WIDTH_INDEX; x++) {
+    		for(int y = MIN_GRID_HEIGHT_INDEX; y < MAX_GRID_HEIGHT_INDEX / 2; y++)
+	    		addPiece(false, new Point(x, y));
+    		for(int y = (MAX_GRID_HEIGHT_INDEX / 2) + 1; y <= MAX_GRID_HEIGHT_INDEX; y++)
+    			addPiece(true, new Point(x, y));
+    		if(x < MAX_GRID_WIDTH_INDEX / 2) {
+    			if(count % 2 == 0)
+    				addPiece(false, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    			else
+    				addPiece(true, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    		}
+    		else if(x > MAX_GRID_WIDTH_INDEX / 2) {
+    			if(count % 2 == 0)
+    				addPiece(true, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    			else
+    				addPiece(false, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    		}
+    		count++;
+    	}
     }//}}}
     
+    public void multiTurnMessage() {
+    	JOptionPane.showMessageDialog(this, "Move Again", "It is still your turn", JOptionPane.PLAIN_MESSAGE);
+    }
+    
     public void winMessage() {
-    	JOptionPane.showMessageDialog(this, "Winner", "Congradulations, You Won!", JOptionPane.PLAIN_MESSAGE);
+    	JOptionPane.showMessageDialog(this, "Winner", "Congratulations, You Won!", JOptionPane.PLAIN_MESSAGE);
     }
     
     public void loseMessage() {
     	JOptionPane.showMessageDialog(this, "Loser", "You Lose", JOptionPane.PLAIN_MESSAGE);
     }
+    
+    public void illegalMove() {
+    	JOptionPane.showMessageDialog(this, "No!", "Invalid move!", JOptionPane.PLAIN_MESSAGE);
+    }    
 }
