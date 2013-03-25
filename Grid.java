@@ -73,20 +73,19 @@ public class Grid extends JPanel{
         //all other spaces were initialized to 0
         return state;
     }//}}}
-    
-    	
-    public int winningState(){//{{{
+	
+	Boolean winningState(){//{{{
 		
-	//Also need to add a turns at 0 condition
-	//Can add later - currently part of stateMachine.
-	if(playerPieces.isEmpty() || enemyPieces.isEmpty()){
+		//Also need to add a turns at 0 condition
+		//Can add later - currently part of stateMachine.
+		if(playerPieces.isEmpty() || enemyPieces.isEmpty()){
 
-		return true;
-	}
-	return false;		
-
-    }//}}}
-
+			return true;
+		}
+		return false;		
+	
+	}//}}}
+	
     public Piece getPieceAt(Point pt) {//{{{
         //assumes the search won't fail
         for(Piece p : playerPieces) {
