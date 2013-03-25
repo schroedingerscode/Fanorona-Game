@@ -40,8 +40,7 @@ public class AI {
 
         for (int[][] move: validMoves){
 
-            bestMove = Math.max(bestMove,minValue(move, depth-1, alpha, beta));			
-         			
+            bestMove = Math.max(bestMove,minValue(move, depth-1, alpha, beta));	        			
             alpha = Math.max(alpha, bestMove);
             
             if (bestMove >= beta) return bestMove;
