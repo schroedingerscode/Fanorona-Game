@@ -33,18 +33,18 @@ public class AI {
     static int maxValue(int[][] gameState, int depth, int alpha, int beta){
 
 
-        if ( gameOver(gameState) ) return evaluateBoard(gameState);
+        if ( gameOver(gameState) || depth <= 0) return evaluateBoard(gameState);
 		
         int bestMove = -99999;
 	ArrayList<int[][]> validMoves = getValidMoves(gameState);
 
         for (int[][] move: validMoves){
 
-            bestMove = Math.max(bestMove,minValue(move, depth-1, alpha, beta));
-			
-            if (bestMove >= beta) return bestMove;
-			
+            bestMove = Math.max(bestMove,minValue(move, depth-1, alpha, beta));			
+         			
             alpha = Math.max(alpha, bestMove);
+            
+            if (bestMove >= beta) return bestMove;
         }
         return bestMove;
     }
@@ -52,7 +52,7 @@ public class AI {
     static int minValue(int[][] gameState, int depth, int alpha, int beta){
 
 
-        if ( gameOver(gameState) ) return evaluateBoard(gameState);
+        if ( gameOver(gameState) || depth <= 0 ) return evaluateBoard(gameState);
 
         int bestMove = 99999;
 	ArrayList<int[][]> validMoves = getValidMoves(gameState);
@@ -60,10 +60,9 @@ public class AI {
         for (int[][] move: validMoves){
 
             bestMove = Math.min(bestMove, maxValue(move, depth-1, alpha, beta));
-			
-            if (bestMove >= beta) return bestMove;  
-			
-            beta = Math.min(beta, bestMove);
+	    beta = Math.min(beta, bestMove);
+	    
+            if (bestMove <= alpha) return bestMove;
         }
         return bestMove;
     }
