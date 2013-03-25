@@ -201,24 +201,20 @@ public class Grid extends JPanel{
 		adjacentPoints.add(new Point(a.x, a.y - 1));
 		adjacentPoints.add(new Point(a.x + 1, a.y));
 		adjacentPoints.add(new Point(a.x - 1, a.y));
-    	adjacentPoints.add(new Point(a.x + 1, a.y + 1));
+    		adjacentPoints.add(new Point(a.x + 1, a.y + 1));
 		adjacentPoints.add(new Point(a.x + 1, a.y - 1));
 		adjacentPoints.add(new Point(a.x - 1, a.y + 1));
 		adjacentPoints.add(new Point(a.x - 1, a.y - 1));
     	if((a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0)) {    		
     		for(int n = 0; n < adjacentPoints.size(); n++) {
-    			if(adjacentPoints.get(n) == b)
+    			if(adjacentPoints.get(n).x == b.x && adjacentPoints.get(n).y == b.y)
     				return true;
-    			else 
-    				return false;
     		}
     	}
     	else {
     		for(int n = 0; n < adjacentPoints.size() / 2; n++) {
-    			if(adjacentPoints.get(n) == b)
+    			if(adjacentPoints.get(n).x == b.x && adjacentPoints.get(n).y == b.y)
     				return true;
-    			else 
-    				return false;
     		}
     	}
     	return false;
