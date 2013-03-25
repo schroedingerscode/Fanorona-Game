@@ -3,12 +3,30 @@ import java.util.ArrayList;
 
 public class AI {
     AI() {}
-    
-    static int[][] alphaBetaSearch(int[][] gameState){
+	
+	int gameOver(int[][] gameState){
+		// Place holder, code written just have to meld things together
+		// during our next meeting
+		return 0;
+		
+	}
+	
+	int evaluateBoard(int[][] gameState){
+		//Insert evaluate code here
+		return 1;
+	
+	}
+	
+	ArrayList<int[][]> getValidMoves(int[][] gameState) {
+		//Place holder
+		return null;
+	}
+	
+	static int[][] alphaBetaSearch(int[][] gameState){
 
         bestMove = maxValue(gameState,-99999,99999);
 
-    	return null;
+		return null;
     } 
 
 
