@@ -25,6 +25,11 @@ public class StateMachine {
     }//}}}
 
     public State getState() { return s; }
+    
+    public Boolean outOfMoves() {//{{{ 
+	if(movesRemaining == 0) return true;
+	return false;
+    }//}}}
 
     public String run(String evtType, Point p) {//{{{
         //advance the state
