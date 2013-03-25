@@ -4,27 +4,27 @@ import java.util.ArrayList;
 public class AI {
     AI() {}
 	
-	int gameOver(int[][] gameState){
+	static Boolean gameOver(int[][] gameState){
 		// Place holder, code written just have to meld things together
 		// during our next meeting
-		return 0;
+		return false;
 		
 	}
 	
-	int evaluateBoard(int[][] gameState){
+	static int evaluateBoard(int[][] gameState){
 		//Insert evaluate code here
 		return 1;
 	
 	}
 	
-	ArrayList<int[][]> getValidMoves(int[][] gameState) {
+	static ArrayList<int[][]> getValidMoves(int[][] gameState) {
 		//Place holder
 		return null;
 	}
 	
 	static int[][] alphaBetaSearch(int[][] gameState){
 
-        bestMove = maxValue(gameState,-99999,99999);
+        int bestMove = maxValue(gameState,5,-99999,99999);
 
 		return null;
     } 
@@ -36,7 +36,7 @@ public class AI {
         if ( gameOver(gameState) ) return evaluateBoard(gameState);
 		
         int bestMove = -99999;
-		ArrayList<int[][]> validMoves = getValidMoves(gameState);
+	ArrayList<int[][]> validMoves = getValidMoves(gameState);
 
         for (int[][] move: validMoves){
 
@@ -54,12 +54,12 @@ public class AI {
 
         if ( gameOver(gameState) ) return evaluateBoard(gameState);
 
-        bestMove = 99999;
-		ArrayList<int[][]> validMoves = getValidMoves(gameState);
+        int bestMove = 99999;
+	ArrayList<int[][]> validMoves = getValidMoves(gameState);
 
         for (int[][] move: validMoves){
 
-            bestMove = Math.min(bestMove, maxValue(move, depth-1 alpha, beta));
+            bestMove = Math.min(bestMove, maxValue(move, depth-1, alpha, beta));
 			
             if (bestMove >= beta) return bestMove;  
 			
