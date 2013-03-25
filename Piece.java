@@ -12,14 +12,22 @@ public class Piece {
     Boolean color;
 
     Image piecePic;
+    Image highlight;
+    Boolean isHighlighted;
 
     public Point position() { return new Point(x,y); }
 
-    public Boolean isPlayer() { return color; } //white = T
+    public Boolean isPlayer() { return color; } //white = true
 
-    //TODO somebody - write, swap out images
-    public void highlight() {}
-    public void unhighlight() {}
+    public void highlight() {
+        //must call grid.repaint() after returning from here
+        isHighlighted = true; 
+    }
+
+    public void unhighlight() {
+        //must call grid.repaint() after returning from here
+        isHighlighted = false; 
+    }
 
     Piece(Point pt, Boolean color) { 
         x = pt.x;
@@ -36,13 +44,25 @@ public class Piece {
     private void initPiece(Boolean colorIsWhite) {
         //meat of the constructor, shared between the two
         color = colorIsWhite;
+        isHighlighted = false;
+        //load piece image
         String fileName = (colorIsWhite?"wpiece.png":"bpiece.png");
         ImageIcon ii = new ImageIcon(this.getClass().getResource(fileName));
         piecePic = ii.getImage();
+        //load highlight image
+        ImageIcon ii2 = new ImageIcon(this.getClass().getResource("Selector.png"));
+        highlight = ii2.getImage();
     }
 
     public void drawPiece(Graphics2D g2d) {//{{{
+        int globalX = Grid.SQ_W*(x+1);
+        int globalY = Grid.SQ_H*(y+1);
+        //add the highlight image below the piece-to-be-drawn, -50 to center
+        if(isHighlighted) {
+            g2d.drawImage(highlight, globalX - 50, globalY - 50, null);
+        }
+        //draw the actual piece image
         //x+1 for border, -45 to center 90x90 image
-        g2d.drawImage(piecePic, Grid.SQ_W*(x+1)-45, Grid.SQ_H*(y+1)-45, null);
+        g2d.drawImage(piecePic, globalX - 45, globalY - 45, null);
     }//}}}
 }

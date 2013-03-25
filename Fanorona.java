@@ -10,7 +10,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JButton newGameButton;  
 	private JButton instructionsButton; 
 	private JButton nameButton;
-	private JLabel message;  
+	private JLabel messageBox;  
 
     String playerName;
 
@@ -41,26 +41,27 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         nameButton.addActionListener(this);
         addMouseListener(this);
 
-        stateMachine.run("NewGame", null);
+        String message = stateMachine.run("NewGame", null);
+        messageBox.setText(message);
 	} //}}}
 
     public void initButtons() {//{{{
         instructionsButton = new JButton("Instructions");
         newGameButton = new JButton("New Game");
         nameButton = new JButton("Change Name");
-        message = new JLabel("",JLabel.CENTER);
-        message.setFont(new  Font("Serif", Font.BOLD, 14));
-        message.setForeground(Color.BLACK);
+        messageBox = new JLabel("",JLabel.CENTER);
+        messageBox.setFont(new  Font("Serif", Font.BOLD, 14));
+        messageBox.setForeground(Color.BLACK);
 
 		add(newGameButton);
 		add(instructionsButton);	
 		add(nameButton);
-		add(message);
+		add(messageBox);
 
 		newGameButton.setBounds(10, 10, 120, 30);
 		instructionsButton.setBounds(140, 10, 120, 30);
 		nameButton.setBounds(870, 10, 120, 30);
-		message.setBounds(300, 10, 350, 30);
+		messageBox.setBounds(300, 10, 350, 30);
     }//}}}
 
     public void mouseEntered(MouseEvent evt) {}
@@ -69,14 +70,15 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     public void mouseReleased(MouseEvent evt) {}
     public void mouseClicked(MouseEvent evt) {//{{{
         //possibly TODO somebody: right-clicks as cancellation
-        stateMachine.run("Click", evt.getPoint());
+        String message = stateMachine.run("Click", evt.getPoint());
+        messageBox.setText(message);
     }//}}}
 
     public void actionPerformed(ActionEvent evt) {//{{{
         Object src = evt.getSource();
         if(src == newGameButton) {
-            //message.setText("Started a new game. You are white and it is your turn.");
-            stateMachine.run("NewGame", null);
+            String message = stateMachine.run("NewGame", null);
+            messageBox.setText(message);
         } else if(src == instructionsButton) {
             instructions();
         } else if(src == nameButton) {
@@ -87,7 +89,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     void changeName() {//{{{
         playerName = JOptionPane.showInputDialog(null, "Enter player name: ", "", JOptionPane.PLAIN_MESSAGE);
         if(playerName != null)
-        	message.setText("Player name is: " + playerName);
+        	messageBox.setText("Player name is: " + playerName);
     }//}}}
 
     void instructions() {//{{{

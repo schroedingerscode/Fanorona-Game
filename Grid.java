@@ -20,7 +20,6 @@ public class Grid extends JPanel{
     static public int SQ_H  = 100; //Square height
     private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
     private int MAXH = (MAX_GRID_HEIGHT_INDEX) * SQ_H;
-    private int movesRemaining;
     
     Image bkg;
 
@@ -42,7 +41,6 @@ public class Grid extends JPanel{
         //assumes "cherry.png" is in the same directory as the .class files
         ImageIcon ii = new ImageIcon(this.getClass().getResource("cherry.png"));
         bkg = ii.getImage();
-        movesRemaining = 50;
 
         reset(); 
     }//}}}
@@ -55,8 +53,7 @@ public class Grid extends JPanel{
 
     //TODO somebody - write the function
     public void movePiece(Point a, Point b) {//{{{
-        //returns success or failure
-    	movesRemaining--;
+        //assumes you already checked that the move was valid
     }//}}}
 
     public int[][] getState() {//{{{
@@ -70,9 +67,6 @@ public class Grid extends JPanel{
             state[p.position().x][p.position().y] = -1;
         }
         
-        //check moves remaining
-        if(movesRemaining <= 0)
-        	this.loseMessage();
         //all other spaces were initialized to 0
         return state;
     }//}}}
@@ -80,12 +74,12 @@ public class Grid extends JPanel{
     public Piece getPieceAt(Point pt) {//{{{
         //assumes the search won't fail
         for(Piece p : playerPieces) {
-            if(p.position() == pt) { return p; }
+            if(p.position().equals(pt)) { return p; }
         }
         for(Piece p : enemyPieces) {
-            if(p.position() == pt) { return p; }
+            if(p.position().equals(pt)) { return p; }
         }
-        //error, should get here
+        //error, should not get here
         return new Piece(new Point(0,0), true);
     }//}}}
 
@@ -274,13 +268,11 @@ public class Grid extends JPanel{
         addPiece(true, new Point(8,4));
     }//}}}
     
-    public void winMessage()
-    {
+    public void winMessage() {
     	JOptionPane.showMessageDialog(this, "Winner", "Congradulations, You Won!", JOptionPane.PLAIN_MESSAGE);
     }
     
-    public void loseMessage()
-    {
+    public void loseMessage() {
     	JOptionPane.showMessageDialog(this, "Loser", "You Lose", JOptionPane.PLAIN_MESSAGE);
     }
 }
