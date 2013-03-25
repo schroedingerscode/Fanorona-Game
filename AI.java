@@ -11,11 +11,18 @@ public class AI {
 	
     }
 
-    static int evaluateBoard(int[][] gameState){
-	//Insert evaluate code here
-	return 1;
-
-    }
+	static int evaluateBoard(int[][] gameState){
+		int value = 0;
+		
+		for (int x = 0; x < 9; x++){ 
+			for (int y = 0; y < 5; y++){ 
+				if(gameState[x][y] == 1) value++;
+				if(gameState[x][y] == -1) value--;
+			}
+		}
+		return value;
+	}
+	
 
     static ArrayList<int[][]> getValidMoves(int[][] gameState) {
 	//Place holder
