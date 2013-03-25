@@ -4,29 +4,29 @@ import java.util.ArrayList;
 public class AI {
     AI() {}
 	
-	static Boolean gameOver(int[][] gameState){
-		// Place holder, code written just have to meld things together
-		// during our next meeting
-		return false;
-		
-	}
+    static Boolean gameOver(int[][] gameState){
+	// Place holder, code written just have to meld things together
+	// during our next meeting
+	return false;
 	
-	static int evaluateBoard(int[][] gameState){
-		//Insert evaluate code here
-		return 1;
-	
-	}
-	
-	static ArrayList<int[][]> getValidMoves(int[][] gameState) {
-		//Place holder
-		return null;
-	}
-	
-	static int[][] alphaBetaSearch(int[][] gameState){
+    }
 
-        int bestMove = maxValue(gameState,5,-99999,99999);
+    static int evaluateBoard(int[][] gameState){
+	//Insert evaluate code here
+	return 1;
 
-		return null;
+    }
+
+    static ArrayList<int[][]> getValidMoves(int[][] gameState) {
+	//Place holder
+	return null;
+    }
+	
+    static int[][] alphaBetaSearch(int[][] gameState){
+
+    	int bestMove = maxValue(gameState,5,-99999,99999);
+
+	return null;
     } 
 
 
