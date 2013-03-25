@@ -224,9 +224,7 @@ public class Grid extends JPanel{
     public Boolean isValidMove(Point a, Point b) {//{{{
         //restrictions:
         //  must capture if possible
-    	System.out.println("Valid move: " + (isAdjacent(a,b) && isOnGrid(b)));
-        //return isAdjacent(a,b) && isOnGrid(b);
-        return true; //TEMP TODO remove line
+        return isAdjacent(a,b) && isOnGrid(b);
     }//}}}
 
     //TODO someone - write it
