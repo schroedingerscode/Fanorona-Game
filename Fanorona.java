@@ -58,7 +58,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         aiButton.addActionListener(this);
         addMouseListener(this);
 
-        String message = stateMachine.run("NewGame", null);
+        String message = stateMachine.run("NewGame", stateMachine.grid.dimensions());
         messageBox.setText(message);
 	} //}}}
 
@@ -124,7 +124,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     public void actionPerformed(ActionEvent evt) {//{{{
         Object src = evt.getSource();
         if(src == newGameButton) {
-            String message = stateMachine.run("NewGame", null);
+            String message = stateMachine.run("NewGame", stateMachine.grid.dimensions());
             messageBox.setText(message);
         } else if(src == instructionsButton) {
             instructions();

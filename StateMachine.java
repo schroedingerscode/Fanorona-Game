@@ -6,9 +6,8 @@ import java.util.*;
 public class StateMachine {
     public Grid grid;
     private State s;
-    //private int win; // 0 - playing, 1 - win, 2 - lose
     public int movesRemaining;
-    private int MAX_MOVES = 50;
+    private int numRows = 5;
 
     //data valid only in certain states
     private Piece selectedPiece;
@@ -21,8 +20,10 @@ public class StateMachine {
         //selectedPiece is not valid until MOVE states
 		grid = new Grid();  
 		//win = 0;
-        movesRemaining = MAX_MOVES;
+        movesRemaining = maxMoves();
     }//}}}
+
+    private int maxMoves() { return 10*numRows; }
 
     public State getState() { return s; }
     
@@ -36,7 +37,7 @@ public class StateMachine {
         if(evtType == "GameOver") {
             setState(State.GAME_OVER);
         } else if (evtType == "NewGame") {
-            newGame();
+            newGame(p);
             setState(State.PLAYER_SELECT);
         } else if(evtType == "Click") {
             handleClick(p);
@@ -47,7 +48,7 @@ public class StateMachine {
     }//}}}
 
     private String messageForCurrentState() {//{{{
-        String turnMsg = "Turn #" + (MAX_MOVES - movesRemaining) + " ";
+        String turnMsg = "Turn #" + (maxMoves() - movesRemaining) + " ";
         switch(s) {
             case PLAYER_SELECT:
                 return turnMsg + "STATE: PLAYER_SELECT - White, please select a piece";
@@ -135,9 +136,11 @@ public class StateMachine {
         }
     }//}}}
 
-    private void newGame() {//{{{
+    private void newGame(Point p) {//{{{
+        //the input is the board size #rows by #columns
+        numRows = p.x;
         clearTempData();
-        movesRemaining = MAX_MOVES;
+        movesRemaining = maxMoves();
         grid.reset();
     }//}}}
 

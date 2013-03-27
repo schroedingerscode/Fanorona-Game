@@ -25,6 +25,10 @@ public class Grid extends JPanel{
     
     Image bkg;
 
+    public Point dimensions() {
+        return new Point(MAX_GRID_WIDTH_INDEX+1, MAX_GRID_HEIGHT_INDEX+1);
+    }
+
     static public Point asGridCoor(Point scrCoor) {//{{{
         //Screen coordinates to grid coordinates
         //assumes the grid is at 0,0
