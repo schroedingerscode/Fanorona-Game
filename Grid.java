@@ -54,27 +54,36 @@ public class Grid extends JPanel{
         repaint();
     }//}}}
 
-    private Boolean promptCaptureDirection() {
-    	JOptionPane.showMessageDialog(this, "TODO: Ask user whether they'd like to capture fwds or bkwds or infer it. Assuming forward for now.", "Capture Fwd or Bkwd?", JOptionPane.PLAIN_MESSAGE);
-        return true;
-    }
+    private Boolean inferOrPromptCaptureDirection(Point a, Point b, Boolean team) {//{{{
+        Boolean fwdWorks = canKillFwd(a, b, team);
+        Boolean bkwdWorks = canKillBkwd(a, b, team);
+        if(fwdWorks && !bkwdWorks) { return true; }
+        else if(!fwdWorks && bkwdWorks) { return false; }
+        else { //ambiguous situation, prompt
+            JOptionPane.showMessageDialog(this, "TODO: Ask user whether they'd like to capture fwds or bkwds or infer it. Assuming forward for now when inference fails.", "Capture Fwd or Bkwd?", JOptionPane.PLAIN_MESSAGE);
+        }
+        return true; //TEMP TODO change when prompt works
+    }//}}}
 
     public void movePiece(Point a, Point b) {//{{{
         //assumes you already checked that the move was valid
     	Piece p = getPieceAt(a);
         p.move(b);
-        killPieces(promptCaptureDirection(), !p.isPlayer(), a, b);
+
+        Boolean aggressorTeam = p.isPlayer();
+        Boolean captureDir = inferOrPromptCaptureDirection(a, b, aggressorTeam);
+        killPieces(captureDir, a, b, !aggressorTeam);
         repaint();
     }//}}}
 
-    private void killPieces(Boolean isFwdAtk, Boolean killColor, Point a, Point b) {
+    private void killPieces(Boolean isFwdAtk, Point a, Point b, Boolean killColor) {//{{{
         //attack direction vector
-        Point dir = (isFwdAtk)?(Vector.subtract(b,a)):(Vector.subtract(a,b));
-        Point start = (isFwdAtk)?b:a;
+        Point dir = isFwdAtk?(Vector.subtract(b,a)):(Vector.subtract(a,b));
+        Point start = isFwdAtk?b:a;
         killNext(start, dir, killColor);
-    }
+    }//}}}
 
-    private void killNext(Point p, Point dir, Boolean killColor) {
+    private void killNext(Point p, Point dir, Boolean killColor) {//{{{
         Point nextPt = Vector.add(p,dir);
         if(isOnGrid(nextPt)) {
             Piece victim = getPieceAt(nextPt);
@@ -83,12 +92,12 @@ public class Grid extends JPanel{
                 killNext(nextPt, dir, killColor);
             }
         }
-    }
+    }//}}}
 
-    private void kill(Piece p) {
+    private void kill(Piece p) {//{{{
         if(p.isPlayer()) { playerPieces.remove(p); }
         else { enemyPieces.remove(p); }
-    }
+    }//}}}
 
     public int[][] getState() {//{{{
         //returns a 2d array explaining the contents of each grid space
@@ -225,7 +234,7 @@ public class Grid extends JPanel{
     //Points where x and y are not both odd or even results in only 4 adjacent locations
     //This function only checks for ADJACENT locations (even if out of bounds)
     //isValidMoves checks bounded points
-    public Boolean isAdjacent(Point a, Point b) {
+    public Boolean isAdjacent(Point a, Point b) {//{{{
     	List<Point> adjacentPoints = new ArrayList<Point>();
     	adjacentPoints.add(new Point(a.x, a.y + 1));
 		adjacentPoints.add(new Point(a.x, a.y - 1));
@@ -248,13 +257,37 @@ public class Grid extends JPanel{
     		}
     	}
     	return false;
-    }
+    }//}}}
+
+    private Boolean canKillFwd(Point a, Point b, Boolean aggressorTeam) {//{{{
+        Point fwd = Vector.subtract(b,a); //forward
+        Point tarPt = Vector.add(b,fwd); //target point
+        if(!isOnGrid(tarPt)) { return false; }
+        if(getPieceAt(tarPt).isPlayer() != aggressorTeam) { return true; }
+        return false;
+    }//}}}
+
+    private Boolean canKillBkwd(Point a, Point b, Boolean aggressorTeam) {//{{{
+        Point bkwd = Vector.subtract(a,b); //backward
+        Point tarPt = Vector.add(a,bkwd); //target point
+        if(!isOnGrid(tarPt)) { return false; }
+        if(getPieceAt(tarPt).isPlayer() != aggressorTeam) { return true; }
+        return false;
+    }//}}}
+
+    private Boolean canKill(Point a, Point b) {//{{{
+        //checks if a piece moving from a to b has any killables neighbours
+        Boolean c = getPieceAt(a).isPlayer();
+        if(canKillFwd(a,b,c)) { return true; } 
+        if(canKillBkwd(a,b,c)) { return true; } 
+        return false;
+    }//}}}
 
     //WARNING Not functional until isAdjacent is written & the restriction works
     public Boolean isValidMove(Point a, Point b) {//{{{
         //restrictions:
         //  must capture if possible
-        return isAdjacent(a,b) && isOnGrid(b);
+        return /*canKill(a,b) &&*/ isAdjacent(a,b) && isOnGrid(b);
     }//}}}
 
     //TODO someone - write it
@@ -325,6 +358,10 @@ public class Grid extends JPanel{
     		count++;
     	}
     }//}}}
+
+    public void illegalMove() {
+    	JOptionPane.showMessageDialog(this, "All moves must capture, move only one space, & remain on the board.", "Invalid move!", JOptionPane.PLAIN_MESSAGE);
+    }    
     
     public void multiTurnMessage() {
     	JOptionPane.showMessageDialog(this, "Move Again", "It is still your turn", JOptionPane.PLAIN_MESSAGE);
@@ -337,8 +374,4 @@ public class Grid extends JPanel{
     public void loseMessage() {
     	JOptionPane.showMessageDialog(this, "Loser", "You Lose", JOptionPane.PLAIN_MESSAGE);
     }
-    
-    public void illegalMove() {
-    	JOptionPane.showMessageDialog(this, "No!", "Invalid move!", JOptionPane.PLAIN_MESSAGE);
-    }    
 }

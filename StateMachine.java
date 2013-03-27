@@ -106,7 +106,7 @@ public class StateMachine {
                     	System.out.println("MOVE");
                         this.movePiece(pt);
                         handleChainedMove(); //sets next state
-                    } //else do nothing
+                    } else { grid.illegalMove(); }
                 }
                 break;
             case MOVE_AGAIN:
@@ -229,4 +229,5 @@ public class StateMachine {
     	}    	
     	return p;
     }//}}}
+
 }
