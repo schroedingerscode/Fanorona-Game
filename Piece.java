@@ -29,25 +29,7 @@ public class Piece {
         isHighlighted = false; 
     }
 
-    ////Images swapped out highlighted/normal
-    //public void highlight() 
-    //{
-    //    String fileName = (color?"wpiece_highlighted.png":"bpiece_highlighted.png");
-    //    ImageIcon ii = new ImageIcon(this.getClass().getResource(fileName));
-    //    piecePic = ii.getImage();
-
-    //    System.out.println("Highlighted");
-    //}
-    //
-    //public void unhighlight() 
-    //{
-    //	String fileName = (color?"wpiece.png":"bpiece.png");
-    //    ImageIcon ii = new ImageIcon(this.getClass().getResource(fileName));
-    //    piecePic = ii.getImage();
-    //}
-
-    public void move(Point destination)
-    {
+    public void move(Point destination) {
     	x = destination.x;
     	y = destination.y;
     }

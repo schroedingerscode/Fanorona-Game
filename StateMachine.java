@@ -27,8 +27,8 @@ public class StateMachine {
     public State getState() { return s; }
     
     public Boolean outOfMoves() {//{{{ 
-	if(movesRemaining == 0) return true;
-	return false;
+        if(movesRemaining <= 0) return true;
+        return false;
     }//}}}
 
     public String run(String evtType, Point p) {//{{{
@@ -65,7 +65,7 @@ public class StateMachine {
         //code called on ending a turn
         if((newState == State.PLAYER_SELECT) || (newState == State.ENEMY_SELECT)) {
             clearTempData();
-            if(movesRemaining <= 0) { 
+            if(outOfMoves()) { 
                 grid.loseMessage();
                 this.run("GameOver", null);
                 return;
@@ -171,14 +171,6 @@ public class StateMachine {
         if(selectedPiece.isPlayer()) { return true; }
         /*else*/ return false;
     }//}}}
-
-    //private void gameFinished() {
-    //	if(win == 1)
-    //		grid.winMessage();
-    //	else if(win == 2)
-    //		grid.loseMessage();
-    //	else;
-    //}
 
     //0-7 (assuming points are adjacent)
     //0: N, 1: NE, 2: E, 3: SE, 

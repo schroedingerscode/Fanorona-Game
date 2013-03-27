@@ -54,11 +54,41 @@ public class Grid extends JPanel{
         repaint();
     }//}}}
 
-    //TODO somebody - write the function
+    private Boolean promptCaptureDirection() {
+    	JOptionPane.showMessageDialog(this, "TODO: Ask user whether they'd like to capture fwds or bkwds or infer it. Assuming forward for now.", "Capture Fwd or Bkwd?", JOptionPane.PLAIN_MESSAGE);
+        return true;
+    }
+
     public void movePiece(Point a, Point b) {//{{{
         //assumes you already checked that the move was valid
-    	getPieceAt(a).move(b);
+    	Piece p = getPieceAt(a);
+        p.move(b);
+        killPieces(promptCaptureDirection(), !p.isPlayer(), a, b);
+        repaint();
     }//}}}
+
+    private void killPieces(Boolean isFwdAtk, Boolean killColor, Point a, Point b) {
+        //attack direction vector
+        Point dir = (isFwdAtk)?(Vector.subtract(b,a)):(Vector.subtract(a,b));
+        Point start = (isFwdAtk)?b:a;
+        killNext(start, dir, killColor);
+    }
+
+    private void killNext(Point p, Point dir, Boolean killColor) {
+        Point nextPt = Vector.add(p,dir);
+        if(isOnGrid(nextPt)) {
+            Piece victim = getPieceAt(nextPt);
+            if(victim.isPlayer() == killColor) { 
+                kill(victim); 
+                killNext(nextPt, dir, killColor);
+            }
+        }
+    }
+
+    private void kill(Piece p) {
+        if(p.isPlayer()) { playerPieces.remove(p); }
+        else { enemyPieces.remove(p); }
+    }
 
     public int[][] getState() {//{{{
         //returns a 2d array explaining the contents of each grid space
@@ -262,16 +292,6 @@ public class Grid extends JPanel{
         return true;
     }//}}}
     
-    private Boolean deletePiece(Point coor) {
-        if(!(isOnGrid(coor) && isUnique(coor))) { return false; }
-    	Piece p = getPieceAt(coor);
-    	if(p.color)
-    		playerPieces.remove(p);
-    	else
-    		enemyPieces.remove(p);
-    	return true;
-    }
-
     private void clearGridData() {//{{{
         playerPieces = new ArrayList<Piece>();
         enemyPieces = new ArrayList<Piece>();
