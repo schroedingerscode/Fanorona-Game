@@ -13,7 +13,7 @@ public class StateMachine {
     //data valid only in certain states
     private Piece selectedPiece;
     java.util.List<Point> prevPositions;
-    int prevDirection; //NEWS -> 1234, ignoring diagonals for now, 0=none
+    Point prevDirection; //vector: Destination - Start
 
     //need to run() with a "NewGame" event before anything will happen
     public StateMachine() {//{{{
@@ -102,11 +102,12 @@ public class StateMachine {
                 break;
             case MOVE_AGAIN:
                 if(id == 0) {
+                    //selectedPiece has been updated since last move
                     if(grid.isValidDoubleMove(selectedPiece.position(), pt, prevPositions, prevDirection)) {
                     	System.out.println("MOVE AGAIN");
                         this.movePiece(pt);
                         handleChainedMove(); //sets next state
-                    } else { grid.illegalMove(); }
+                    } else { grid.illegalDoubleMove(); }
                 }
                 break;
             //the other states do not respond to "Click" events
@@ -158,6 +159,7 @@ public class StateMachine {
     private void handleChainedMove() {//{{{
         if(grid.canMoveAgain(selectedPiece.position(), prevPositions, prevDirection)) {
             grid.multiTurnMessage();
+            selectPiece(selectedPiece.position()); //to rehighlight
             setState(State.MOVE_AGAIN); 
         } else {
             endTurn();
@@ -167,7 +169,7 @@ public class StateMachine {
     private void clearTempData() {//{{{
         selectedPiece = null;
         prevPositions = new ArrayList<Point>();
-        prevDirection = 0;
+        prevDirection = null;
     }//}}}
 
     private void selectPiece(Point pt) {//{{{
@@ -188,6 +190,8 @@ public class StateMachine {
         prevPositions.add(oldPt);
         prevDirection = getDirection(oldPt, pt);
         grid.movePiece(selectedPiece.position(), pt);
+        //propagate updated position to local copy
+        selectedPiece = grid.getPieceAt(pt);
     }//}}}
 
     public Boolean isPlayerTurn() {//{{{
@@ -198,28 +202,8 @@ public class StateMachine {
         /*else*/ return false;
     }//}}}
 
-    //0-7 (assuming points are adjacent)
-    //0: N, 1: NE, 2: E, 3: SE, 
-    //4: S, 5: SW, 6: W, 7: NW 
-    private int getDirection(Point a, Point b) { //{{{
-    	if(a.x == b.x && a.y - 1 == b.y)
-    		return 0;
-    	else if(a.x + 1 == b.x && a.y - 1 == b.y)
-    		return 1;
-    	else if(a.x + 1 == b.x && a.y == b.y)
-    		return 2;
-    	else if(a.x + 1 == b.x && a.y + 1 == b.y)
-    		return 3;
-    	else if(a.x == b.x && a.y + 1 == b.y)
-    		return 4;
-    	else if(a.x - 1 == b.x && a.y + 1 == b.y)
-    		return 5;
-    	else if(a.x - 1 == b.x && a.y == b.y)
-    		return 6;
-    	else if(a.x - 1 == b.x && a.y - 1 == b.y)
-    		return 7;
-    	else
-    		return -1; 
+    private Point getDirection(Point a, Point b) { //{{{
+        return Vector.subtract(b,a);
     }//}}}
     
     private Point getPointInDirection(Point a, int direction) {//{{{

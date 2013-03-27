@@ -230,33 +230,37 @@ public class Grid extends JPanel{
         return true;
     }//}}}
 
+    private Boolean isStrongPoint(Point a) {//{{{
+        //(odd,odd) or (even,even)
+        return (a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0);
+    }//}}}
+
     //Points where both x and y are odd or even results in 8 adjacent locations
     //Points where x and y are not both odd or even results in only 4 adjacent locations
     //This function only checks for ADJACENT locations (even if out of bounds)
     //isValidMoves checks bounded points
     public Boolean isAdjacent(Point a, Point b) {//{{{
+    	List<Point> adjacentPoints = getAdjacentPoints(a);
+        for(Point p : adjacentPoints) {
+            if(p.equals(b)) { return true; }
+        }
+    	return false;
+    }//}}}
+
+    public List<Point> getAdjacentPoints(Point a) {//{{{
     	List<Point> adjacentPoints = new ArrayList<Point>();
     	adjacentPoints.add(new Point(a.x, a.y + 1));
 		adjacentPoints.add(new Point(a.x, a.y - 1));
 		adjacentPoints.add(new Point(a.x + 1, a.y));
 		adjacentPoints.add(new Point(a.x - 1, a.y));
-    		adjacentPoints.add(new Point(a.x + 1, a.y + 1));
-		adjacentPoints.add(new Point(a.x + 1, a.y - 1));
-		adjacentPoints.add(new Point(a.x - 1, a.y + 1));
-		adjacentPoints.add(new Point(a.x - 1, a.y - 1));
-    	if((a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0)) {    		
-    		for(int n = 0; n < adjacentPoints.size(); n++) {
-    			if(adjacentPoints.get(n).x == b.x && adjacentPoints.get(n).y == b.y)
-    				return true;
-    		}
-    	}
-    	else {
-    		for(int n = 0; n < adjacentPoints.size() / 2; n++) {
-    			if(adjacentPoints.get(n).x == b.x && adjacentPoints.get(n).y == b.y)
-    				return true;
-    		}
-    	}
-    	return false;
+        //diagonals
+        if(isStrongPoint(a)) {
+            adjacentPoints.add(new Point(a.x + 1, a.y + 1));
+            adjacentPoints.add(new Point(a.x + 1, a.y - 1));
+            adjacentPoints.add(new Point(a.x - 1, a.y + 1));
+            adjacentPoints.add(new Point(a.x - 1, a.y - 1));
+        }
+        return adjacentPoints;
     }//}}}
 
     private Boolean canKillFwd(Point a, Point b, Boolean aggressorTeam) {//{{{
@@ -283,33 +287,53 @@ public class Grid extends JPanel{
         return false;
     }//}}}
 
-    //WARNING Not functional until isAdjacent is written & the restriction works
     public Boolean isValidMove(Point a, Point b) {//{{{
         //restrictions:
         //  must capture if possible
-        return canKill(a,b) && isAdjacent(a,b) && isOnGrid(b);
+        //isUnique to make sure the space is empty
+        System.out.println("Can kill: " + canKill(a,b));
+        System.out.println("Adjacent: " + isAdjacent(a,b));
+        System.out.println("OnGrid: " + isOnGrid(b));
+        System.out.println("Unqiue: " + isUnique(b));
+        return canKill(a,b) && isAdjacent(a,b) && isOnGrid(b) && isUnique(b);
     }//}}}
 
-    //TODO someone - write it
-    public Boolean isValidDoubleMove(Point a, Point b, java.util.List<Point> prevPositions, int prevDirection) {//{{{
+    //!!!WARNING untested
+    //public List<Point> getValidMoves(Point a) {//{{{
+    //    //returns a list of the valis pt B's when moving from pt A
+    //    List<Point> validMoves = getAdjacentPoints(a);
+    //    for(Point b : neighbours) {
+    //        if(!isValidMove(a, b)) { 
+    //            neighbours.remove(b);
+    //        }
+    //    }
+    //    return validMoves;
+    //}//}}}
+
+    public Boolean isValidDoubleMove(Point a, Point b, java.util.List<Point> prevPositions, Point prevDirection) {//{{{
         //restrictions:
         //1- must be same piece as before
-        //2- cannot go back to somewhere you've been
-        //3- cannot move in the same direction
-        //4- must capture
+        //2- must capture
         if(!isValidMove(a,b)) { return false; }
-
-
-        return false;
+        //3- cannot move in the same direction
+        if(Vector.subtract(b,a).equals(prevDirection)) { return false; }
+        //4- cannot go back to somewhere you've been
+        for(Point p : prevPositions) {
+            if(p.equals(b)) { return false; }
+        }
+        return true;
     }//}}}
 
-    //TODO someone - write it
-    public Boolean canMoveAgain(Point a, java.util.List<Point> prevPositions, int prevDirection) {//{{{
-        Boolean canMoveAgain = false;
-        //per(empty adjacent space) {
-        //  if(isValidDoubleMove(stuff)) { return true; }
-        //}
-        return canMoveAgain;
+    public Boolean canMoveAgain(Point a, java.util.List<Point> prevPositions, Point prevDirection) {//{{{
+        List<Point> neighbours = getAdjacentPoints(a);
+        for(Point p : neighbours) {
+            if(!hasPieceAt(p)) { //empty space
+                if(isValidDoubleMove(a, p, prevPositions, prevDirection)) { 
+                    return true; 
+                }
+            }
+        }
+        return false;
     }//}}}
 
     private Boolean addPiece(Boolean isAlly, Point coor) {//{{{
@@ -355,8 +379,12 @@ public class Grid extends JPanel{
     	JOptionPane.showMessageDialog(this, "All moves must capture, move only one space, & remain on the board.", "Invalid move!", JOptionPane.PLAIN_MESSAGE);
     }    
     
+    public void illegalDoubleMove() {
+    	JOptionPane.showMessageDialog(this, "All double moves must capture, move only one space, remain on the board, not revisit space, & change direction.", "Invalid move!", JOptionPane.PLAIN_MESSAGE);
+    }    
+    
     public void multiTurnMessage() {
-    	JOptionPane.showMessageDialog(this, "Move Again", "It is still your turn", JOptionPane.PLAIN_MESSAGE);
+    	JOptionPane.showMessageDialog(this, "Move again or right-click to decline.", "It is still your turn", JOptionPane.PLAIN_MESSAGE);
     }
     
     public void winMessage() {
