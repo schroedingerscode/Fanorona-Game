@@ -10,8 +10,7 @@ import java.util.*;
 import java.util.List;
 
 public class Grid extends JPanel{
-    private List<Piece> playerPieces;
-    private List<Piece> enemyPieces;
+    private List<Piece> pieces;
     
     // 0 <= width <= 13 (must be odd)
     // 0 <= height <= 13 (must be odd)
@@ -60,9 +59,11 @@ public class Grid extends JPanel{
         if(fwdWorks && !bkwdWorks) { return true; }
         else if(!fwdWorks && bkwdWorks) { return false; }
         else { //ambiguous situation, prompt
-            JOptionPane.showMessageDialog(this, "TODO: Ask user whether they'd like to capture fwds or bkwds or infer it. Assuming forward for now when inference fails.", "Capture Fwd or Bkwd?", JOptionPane.PLAIN_MESSAGE);
+            int reply = JOptionPane.showConfirmDialog(this, "In which direction would you like to capture?\nPress \"Yes\" to capture forward.\nPress \"No\" to capture backwards.", "Capture Forward or Backward?", JOptionPane.YES_NO_OPTION);
+            if(reply == JOptionPane.YES_OPTION) {
+                return true;
+            } else { return false; }
         }
-        return true; //TEMP TODO change when prompt works
     }//}}}
 
     public void movePiece(Point a, Point b) {//{{{
@@ -86,6 +87,7 @@ public class Grid extends JPanel{
     private void killNext(Point p, Point dir, Boolean killColor) {//{{{
         Point nextPt = Vector.add(p,dir);
         if(isOnGrid(nextPt)) {
+            if(!hasPieceAt(nextPt)) { return; } //done killing
             Piece victim = getPieceAt(nextPt);
             if(victim.isPlayer() == killColor) { 
                 kill(victim); 
@@ -94,47 +96,50 @@ public class Grid extends JPanel{
         }
     }//}}}
 
-    private void kill(Piece p) {//{{{
-        if(p.isPlayer()) { playerPieces.remove(p); }
-        else { enemyPieces.remove(p); }
-    }//}}}
+    private void kill(Piece p) { pieces.remove(p); }
 
     public int[][] getState() {//{{{
         //returns a 2d array explaining the contents of each grid space
         //to be used by the AI. 1 = player, 0 = empty, -1 = enemy
         int[][] state = new int[9][5]; //x,y
-        for(Piece p : playerPieces) {
-            state[p.position().x][p.position().y] = 1;
-        }
-        for(Piece p : enemyPieces) {
-            state[p.position().x][p.position().y] = -1;
+        for(Piece p : pieces) {
+            if(p.isPlayer()) {
+                state[p.position().x][p.position().y] = 1;
+            } else {
+                state[p.position().x][p.position().y] = -1;
+            }
         }
         //all other spaces were initialized to 0
         return state;
     }//}}}
 	
+    //TODO finish
 	Boolean winningState(){//{{{
-		
 		//Also need to add a turns at 0 condition
 		//Can add later - currently part of stateMachine.
-		if(playerPieces.isEmpty() || enemyPieces.isEmpty()){
+		//if(playerPieces.isEmpty() || enemyPieces.isEmpty()){
 
-			return true;
-		}
+		//	return true;
+		//}
 		return false;		
-	
 	}//}}}
 	
     public Piece getPieceAt(Point pt) {//{{{
         //assumes the search won't fail
-        for(Piece p : playerPieces) {
+        for(Piece p : pieces) {
             if(p.position().equals(pt)) { return p; }
         }
-        for(Piece p : enemyPieces) {
-            if(p.position().equals(pt)) { return p; }
+        //error, should not get here, DEBUG code
+        System.out.println("ERROR: there is no piece at:" + pt.x + ", " + pt.y);
+        System.exit(0);
+        return null;//should never get here
+    }//}}}
+
+    public Boolean hasPieceAt(Point pt) {//{{{
+        for(Piece p : pieces) {
+            if(p.position().equals(pt)) { return true; }
         }
-        //error, should not get here
-        return new Piece(new Point(0,0), true);
+        return false;
     }//}}}
 
     private void drawGridLines(Graphics2D g2d) {//{{{
@@ -200,19 +205,14 @@ public class Grid extends JPanel{
         drawGridLines(g2d);
 
         //draw pieces based on stored data
-        for(Piece p : playerPieces) {
+        for(Piece p : pieces) {
             p.drawPiece(g2d);
-        }
-        for(Piece p : enemyPieces) {
             p.drawPiece(g2d);
         }
     }  //}}}
 
     private Boolean isUnique(Point coor) {//{{{
-        for(Piece p : playerPieces) {
-            if(p.position().equals(coor)) { return false; }
-        }
-        for(Piece p : enemyPieces) {
+        for(Piece p : pieces) {
             if(p.position().equals(coor)) { return false; }
         }
         return true;
@@ -262,7 +262,7 @@ public class Grid extends JPanel{
     private Boolean canKillFwd(Point a, Point b, Boolean aggressorTeam) {//{{{
         Point fwd = Vector.subtract(b,a); //forward
         Point tarPt = Vector.add(b,fwd); //target point
-        if(!isOnGrid(tarPt)) { return false; }
+        if(!isOnGrid(tarPt) || !hasPieceAt(tarPt)) { return false; }
         if(getPieceAt(tarPt).isPlayer() != aggressorTeam) { return true; }
         return false;
     }//}}}
@@ -270,7 +270,7 @@ public class Grid extends JPanel{
     private Boolean canKillBkwd(Point a, Point b, Boolean aggressorTeam) {//{{{
         Point bkwd = Vector.subtract(a,b); //backward
         Point tarPt = Vector.add(a,bkwd); //target point
-        if(!isOnGrid(tarPt)) { return false; }
+        if(!isOnGrid(tarPt) || !hasPieceAt(tarPt)) { return false; }
         if(getPieceAt(tarPt).isPlayer() != aggressorTeam) { return true; }
         return false;
     }//}}}
@@ -287,7 +287,7 @@ public class Grid extends JPanel{
     public Boolean isValidMove(Point a, Point b) {//{{{
         //restrictions:
         //  must capture if possible
-        return /*canKill(a,b) &&*/ isAdjacent(a,b) && isOnGrid(b);
+        return canKill(a,b) && isAdjacent(a,b) && isOnGrid(b);
     }//}}}
 
     //TODO someone - write it
@@ -316,19 +316,11 @@ public class Grid extends JPanel{
         //no gfx here, the drawing function goes off of stored data
         if(!(isOnGrid(coor) && isUnique(coor))) { return false; }
 
-        Piece p = new Piece(coor, isAlly);
-        if(isAlly) {
-            playerPieces.add(p);
-        } else {
-            enemyPieces.add(p);
-        }
+        pieces.add(new Piece(coor, isAlly));
         return true;
     }//}}}
     
-    private void clearGridData() {//{{{
-        playerPieces = new ArrayList<Piece>();
-        enemyPieces = new ArrayList<Piece>();
-    }//}}}
+    private void clearGridData() { pieces = new ArrayList<Piece>(); }
 
     private void placePiecesInInitBoardState() {//{{{
         //use resetGrid() for external calls

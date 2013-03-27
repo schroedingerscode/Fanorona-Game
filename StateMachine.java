@@ -40,6 +40,8 @@ public class StateMachine {
             setState(State.PLAYER_SELECT);
         } else if(evtType == "Click") {
             handleClick(p);
+        } else if(evtType == "RClick") {
+            handleRClick();
         }
         return messageForCurrentState();
     }//}}}
@@ -62,17 +64,6 @@ public class StateMachine {
     }//}}}
 
     private void setState(State newState) {//{{{
-        //code called on ending a turn
-        if((newState == State.PLAYER_SELECT) || (newState == State.ENEMY_SELECT)) {
-            clearTempData();
-            if(outOfMoves()) { 
-                grid.loseMessage();
-                this.run("GameOver", null);
-                return;
-            }
-            movesRemaining--;
-        }
-
         s = newState;
     }//}}}
 
@@ -115,11 +106,31 @@ public class StateMachine {
                     	System.out.println("MOVE AGAIN");
                         this.movePiece(pt);
                         handleChainedMove(); //sets next state
-                    }
-                    //no option to cancel or decline to move yet
+                    } else { grid.illegalMove(); }
                 }
                 break;
             //the other states do not respond to "Click" events
+        }
+    }//}}}
+
+    private void handleRClick() {//{{{
+        switch(s) {
+            case MOVE:
+                //De-select, revert other altered data
+                Boolean playerTurn = this.isPlayerTurn(); //order-dependent
+                deselectPiece();
+                selectedPiece = null;
+                if(playerTurn) {
+                    setState(State.PLAYER_SELECT);
+                } else {
+                    setState(State.ENEMY_SELECT);
+                }
+                break;
+            case MOVE_AGAIN:
+                //decline to move
+                endTurn();
+                break;
+            //the other states do not respond to "RClick" events
         }
     }//}}}
 
@@ -129,16 +140,27 @@ public class StateMachine {
         grid.reset();
     }//}}}
 
+    private void endTurn() {//{{{
+        if(selectedPiece.isPlayer()) {
+            setState(State.ENEMY_SELECT);
+        } else {
+            setState(State.PLAYER_SELECT);
+        }
+        clearTempData();
+        if(outOfMoves()) { 
+            grid.loseMessage();
+            this.run("GameOver", null);
+            return;
+        }
+        movesRemaining--;
+    }//}}}
+
     private void handleChainedMove() {//{{{
         if(grid.canMoveAgain(selectedPiece.position(), prevPositions, prevDirection)) {
             grid.multiTurnMessage();
             setState(State.MOVE_AGAIN); 
         } else {
-            if(selectedPiece.isPlayer()) {
-                setState(State.ENEMY_SELECT);
-            } else {
-                setState(State.PLAYER_SELECT);
-            }
+            endTurn();
         }
     }//}}}
 
@@ -154,9 +176,13 @@ public class StateMachine {
         grid.repaint();
     }//}}}
 
-    private void movePiece(Point pt) {//{{{
+    private void deselectPiece() {//{{{
         grid.getPieceAt(selectedPiece.position()).unhighlight();
-        grid.repaint(); //technically redundant as you movePiece soon
+        grid.repaint();
+    }//}}}
+
+    private void movePiece(Point pt) {//{{{
+        deselectPiece();
 
         Point oldPt = selectedPiece.position();
         prevPositions.add(oldPt);
