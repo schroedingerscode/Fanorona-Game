@@ -89,9 +89,12 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     public void mousePressed(MouseEvent evt) {}
     public void mouseReleased(MouseEvent evt) {}
     public void mouseClicked(MouseEvent evt) {//{{{
-        //possibly TODO somebody: right-clicks as cancellation
-        String message = stateMachine.run("Click", evt.getPoint());
-        messageBox.setText(message);
+        //handle clicks when it's not the enemy turn & ai is on
+        if(!aiIsOn || (aiIsOn && stateMachine.isPlayerTurn())) {
+            //possibly TODO somebody: right-clicks as cancellation
+            String message = stateMachine.run("Click", evt.getPoint());
+            messageBox.setText(message);
+        }
 
         //start AI on transition to enemy turn
         runAI();
