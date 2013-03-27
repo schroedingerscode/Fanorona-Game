@@ -21,7 +21,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
     AI ai;
 
-	public static void main(String[] args) {//{{{
+	public static void main(String[] args) throws Exception {//{{{
         //setup game window
 		JFrame window = new JFrame("Fanorona");
 		Fanorona content = new Fanorona();
