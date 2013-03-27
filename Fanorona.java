@@ -2,6 +2,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.*;
+import javax.sound.midi.*;
+import javax.swing.JOptionPane;
+import java.net.URL;  
 
 public class Fanorona extends JPanel implements ActionListener, MouseListener {
     StateMachine stateMachine; //contains grid
@@ -27,6 +30,12 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		window.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		window.setResizable(false);  
 		window.setVisible(true);
+		URL url = new URL("http://www.vgmusic.com/music/console/nintendo/nes/advlolo1_theme.mid");
+	        Sequence sequence = MidiSystem.getSequence(url);
+	        Sequencer sequencer = MidiSystem.getSequencer(); 
+	        sequencer.open();
+	        sequencer.setSequence(sequence);
+	        sequencer.start();
 	}//}}}
 
 	public Fanorona() {//{{{
