@@ -48,18 +48,18 @@ public class StateMachine {
     }//}}}
 
     private String messageForCurrentState() {//{{{
-        String turnMsg = "Turn #" + (maxMoves() - movesRemaining) + " ";
+        String turnMsg = "<html>Turn #" + (maxMoves() - movesRemaining) + " <br>";
         switch(s) {
             case PLAYER_SELECT:
-                return turnMsg + "STATE: PLAYER_SELECT - White, please select a piece";
+                return turnMsg + "STATE: PLAYER_SELECT - White, please select a piece</html>";
             case ENEMY_SELECT:
-                return turnMsg + "STATE: ENEMY_SELECT - Black, please select a piece";
+                return turnMsg + "STATE: ENEMY_SELECT - Black, please select a piece</html>";
             case MOVE:
-                return turnMsg + "STATE: MOVE - Please move your selected piece";
+                return turnMsg + "STATE: MOVE - Please move your selected piece</html>";
             case MOVE_AGAIN:
-                return turnMsg + "STATE: MOVE_AGAIN - Please move the same piece again. Currently, the decline functionality has not been implemented.";
+                return turnMsg + "STATE: MOVE_AGAIN - Please move the same piece again. Currently, the decline functionality has not been implemented.</html>";
             case GAME_OVER:
-                return "STATE: GAME_OVER - To play again, please reset the board with the NEW_GAME button.";
+                return "STATE: GAME_OVER - To play again, please reset the board with the NEW_GAME button.</html>";
         }
         return "ERROR: Reached invalid state";
     }//}}}
