@@ -15,9 +15,9 @@ public class Grid extends JPanel{
     // 0 <= width <= 13 (must be odd)
     // 0 <= height <= 13 (must be odd)
     private int MIN_GRID_WIDTH_INDEX = 0;
-    private int MAX_GRID_WIDTH_INDEX = 8;
+    private int MAX_GRID_WIDTH_INDEX;
     private int MIN_GRID_HEIGHT_INDEX = 0;
-    private int MAX_GRID_HEIGHT_INDEX = 4;
+    private int MAX_GRID_HEIGHT_INDEX;
     static public int SQ_W  = 100; //Square width
     static public int SQ_H  = 100; //Square height
     private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
@@ -28,7 +28,7 @@ public class Grid extends JPanel{
     public Point dimensions() {
         return new Point(MAX_GRID_WIDTH_INDEX+1, MAX_GRID_HEIGHT_INDEX+1);
     }
-
+    
     static public Point asGridCoor(Point scrCoor) {//{{{
         //Screen coordinates to grid coordinates
         //assumes the grid is at 0,0
@@ -41,8 +41,11 @@ public class Grid extends JPanel{
         return new Point(x,y);
     }//}}}
 
-    public Grid() { //{{{
+    public Grid(int rowSize, int colSize) { //{{{
         super(); 
+        MAX_GRID_WIDTH_INDEX = rowSize-1;
+        MAX_GRID_HEIGHT_INDEX = colSize-1;
+        
         //load background image
         //assumes "cherry.png" is in the same directory as the .class files
         ImageIcon ii = new ImageIcon(this.getClass().getResource("cherry.png"));
@@ -145,60 +148,35 @@ public class Grid extends JPanel{
         }
         return false;
     }//}}}
-
+    
     private void drawGridLines(Graphics2D g2d) {//{{{
         g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(5)); //line width
-        int xBorder = SQ_W;
-        int yBorder = SQ_H;
-        //draw column separators
-        for(int x = MIN_GRID_WIDTH_INDEX; x < MAX_GRID_WIDTH_INDEX + 1; x++) {
-            int globalX = (int) (SQ_W*(x+1));
-            g2d.draw(new Line2D.Float(globalX+0, yBorder, globalX, yBorder + MAXH));
-        }
-    
-        //draw row separators
-        for(int y = MIN_GRID_HEIGHT_INDEX; y < MAX_GRID_HEIGHT_INDEX + 1; y++) {
-            int globalY = (int) (SQ_H*(y+1));
-            g2d.draw(new Line2D.Float(xBorder, globalY + 0, xBorder+MAXW, globalY + 0));
-        }
-
+        int rowBorder = MAX_GRID_WIDTH_INDEX * SQ_W;
+        int colBorder = MAX_GRID_HEIGHT_INDEX * SQ_H;
+        
+        //drawing columns
+        for(int x = MIN_GRID_WIDTH_INDEX + 1; x <= MAX_GRID_WIDTH_INDEX + 1; x++)
+        	g2d.draw(new Line2D.Float(x*SQ_W, MIN_GRID_HEIGHT_INDEX+SQ_H, x*SQ_W, colBorder+SQ_H));
+        
+        //drawing rows
+        for(int y = MIN_GRID_WIDTH_INDEX + 1; y <= MAX_GRID_HEIGHT_INDEX + 1; y++)
+        	g2d.draw(new Line2D.Float(MIN_GRID_WIDTH_INDEX+SQ_W, y*SQ_H, rowBorder+SQ_W, y*SQ_H));	
+	
+		//drawing diaganols
         g2d.setStroke(new BasicStroke(3)); //line width
-        //TODO JOSH or NAM, make diagonals NOT hardcoded
-        //working on this:
-/*        if(MAX_GRID_WIDTH_INDEX > MAX_GRID_HEIGHT_INDEX) {
-    		for(int x = MIN_GRID_WIDTH_INDEX + 1; x <= (MAX_GRID_WIDTH_INDEX+1) / 2; x += 2) {
-    			g2d.draw(new Line2D.Float(x*100, (MIN_GRID_HEIGHT_INDEX+1)*100, (x+(MAX_GRID_WIDTH_INDEX/2))*100, (MAX_GRID_HEIGHT_INDEX+1)*100));
+    	for(int x = MIN_GRID_WIDTH_INDEX + 1; x <= MAX_GRID_WIDTH_INDEX + 1; x++) {
+    		for(int y = MIN_GRID_HEIGHT_INDEX + 1; y <= MAX_GRID_HEIGHT_INDEX + 1; y++) {
+    			if((x - y) % 2 == 0) {
+    				if((x < MAX_GRID_WIDTH_INDEX + 1) && (y < MAX_GRID_HEIGHT_INDEX + 1))
+    					g2d.draw(new Line2D.Float(x*100, y*100, (x+1)*100, (y+1)*100));
+    				if((x < MAX_GRID_WIDTH_INDEX + 1) && (y > MIN_GRID_HEIGHT_INDEX + 1))
+    					g2d.draw(new Line2D.Float(x*100, y*100, (x+1)*100, (y-1)*100));
+    			}
     		}
     	}
-        
-        else if(MAX_GRID_WIDTH_INDEX == MAX_GRID_HEIGHT_INDEX) {
-        	for(int x = MIN_GRID_WIDTH_INDEX + 1; x < MAX_GRID_WIDTH_INDEX / 2; x += 2) {
-    			g2d.draw(new Line2D.Float(x*100, MIN_GRID_HEIGHT_INDEX, (x+4)*100, MAX_GRID_HEIGHT_INDEX));
-    		}
-        }
-        
-        else {
-        	for(int x = MIN_GRID_WIDTH_INDEX + 1; x < MAX_GRID_WIDTH_INDEX / 2; x += 2) {
-    			g2d.draw(new Line2D.Float(x*100, MIN_GRID_HEIGHT_INDEX, (x+4)*100, MAX_GRID_HEIGHT_INDEX));
-    		}
-        }*/
-        
-        //diagonals, TL to BR
-        g2d.draw(new Line2D.Float(100, 300, 300, 500));
-        g2d.draw(new Line2D.Float(100, 100, 500, 500));
-        g2d.draw(new Line2D.Float(300, 100, 700, 500));
-        g2d.draw(new Line2D.Float(500, 100, 900, 500));
-        g2d.draw(new Line2D.Float(700, 100, 900, 300)); 
-        
-        //diagonals, TR to BL
-        g2d.draw(new Line2D.Float(100, 300, 300, 100));
-        g2d.draw(new Line2D.Float(100, 500, 500, 100));
-        g2d.draw(new Line2D.Float(300, 500, 700, 100));
-        g2d.draw(new Line2D.Float(500, 500, 900, 100));
-        g2d.draw(new Line2D.Float(700, 500, 900, 300));
     }//}}}
-
+    
     public void paintComponent(Graphics g) {//{{{
         super.paintComponent(g);
 
@@ -233,7 +211,7 @@ public class Grid extends JPanel{
         }
         return true;
     }//}}}
-
+    
     private Boolean isStrongPoint(Point a) {//{{{
         //(odd,odd) or (even,even)
         return (a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0);
