@@ -17,6 +17,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JLabel messageBox;  
 
     String playerName;
+    int rowSize;
+    int colSize;
     Boolean aiIsOn;
 
     AI ai;
@@ -27,24 +29,25 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		Fanorona content = new Fanorona();
 		window.setContentPane(content);
 		window.pack();
-		window.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setResizable(false);  
 		window.setVisible(true);
 		URL url = new URL("http://www.vgmusic.com/music/console/nintendo/nes/advlolo1_theme.mid");
-	        Sequence sequence = MidiSystem.getSequence(url);
-	        Sequencer sequencer = MidiSystem.getSequencer(); 
-	        sequencer.open();
-	        sequencer.setSequence(sequence);
-	        sequencer.start();
+        Sequence sequence = MidiSystem.getSequence(url);
+        Sequencer sequencer = MidiSystem.getSequencer(); 
+        sequencer.open();
+        sequencer.setSequence(sequence);
+        sequencer.start();
 	}//}}}
 
 	public Fanorona() {//{{{
 		setLayout(null);  
-		setPreferredSize(new Dimension(1000,650));
+		askGridSize();
+		setPreferredSize(new Dimension(rowSize*100+100,colSize*100+150));
 
-        stateMachine = new StateMachine();
+        stateMachine = new StateMachine(rowSize, colSize);
 		add(stateMachine.grid);
-		stateMachine.grid.setBounds(1,51,1000,600); 
+		stateMachine.grid.setBounds(1,51,rowSize*100+100,colSize*100+100); 
 
         ai = new AI();
         aiIsOn = false;
@@ -58,7 +61,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         aiButton.addActionListener(this);
         addMouseListener(this);
 
-        String message = stateMachine.run("NewGame", stateMachine.grid.dimensions());
+        String message = stateMachine.run("NewGame", null);
         messageBox.setText(message);
 	} //}}}
 
@@ -89,7 +92,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     public void mousePressed(MouseEvent evt) {}
     public void mouseReleased(MouseEvent evt) {}
     public void mouseClicked(MouseEvent evt) {//{{{
-        if(clickingIsAllowed()) {
+    	if(clickingIsAllowed()) {
             if(SwingUtilities.isRightMouseButton(evt)) {
                 String message = stateMachine.run("RClick", null);
                 messageBox.setText(message);
@@ -98,11 +101,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
                 messageBox.setText(message);
             }
         }
-
         //start AI on transition to enemy turn
         runAI();
     }//}}}
-
+    
     private Boolean clickingIsAllowed() {//{{{
         return !aiIsOn || (aiIsOn && stateMachine.isPlayerTurn());
     }//}}}
@@ -124,7 +126,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     public void actionPerformed(ActionEvent evt) {//{{{
         Object src = evt.getSource();
         if(src == newGameButton) {
-            String message = stateMachine.run("NewGame", stateMachine.grid.dimensions());
+            String message = stateMachine.run("NewGame", null);
             messageBox.setText(message);
         } else if(src == instructionsButton) {
             instructions();
@@ -142,6 +144,35 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         
     }//}}}
 
+    //asks the user for a grid size (row, col)
+    void askGridSize() {
+    	JPanel panel = new JPanel();
+    	panel.add(new JLabel("Choose a Fanorona board size (row, column): "));
+    	DefaultComboBoxModel rows = new DefaultComboBoxModel();
+    	DefaultComboBoxModel cols = new DefaultComboBoxModel();
+        for(int n = 1; n <= 13; n+=2) {
+        	rows.addElement(n);
+        	cols.addElement(n);
+        }
+        JComboBox rowsBox = new JComboBox(rows);
+        panel.add(rowsBox);
+        JComboBox colsBox = new JComboBox(cols);
+        panel.add(colsBox);
+        
+        int result = JOptionPane.showConfirmDialog(null, panel, "Choose Fanorona Grid Size", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        switch (result) {
+            case JOptionPane.OK_OPTION:
+            	rowSize = (Integer)rowsBox.getSelectedItem();
+            	colSize = (Integer)colsBox.getSelectedItem();
+                System.out.println("rows: " + rowSize);
+                System.out.println("columns: " + colSize);
+                break;
+            default:
+            	System.exit(0);
+            	break;
+        }    	
+    }
+    
     void changeName() {//{{{
         playerName = JOptionPane.showInputDialog(null, "Enter player name: ", "", JOptionPane.PLAIN_MESSAGE);
         if(playerName != null)
