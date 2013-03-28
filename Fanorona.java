@@ -16,7 +16,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JButton aiButton;
 	private JLabel messageBox;  
 
-    String playerName;
+	static public int BUTTON_SIZE_WIDTH  = 120;
+    static public int BUTTON_SIZE_HEIGHT = 30;
+	
+	String playerName;
     int rowSize;
     int colSize;
     Boolean aiIsOn;
@@ -29,6 +32,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		Fanorona content = new Fanorona();
 		window.setContentPane(content);
 		window.pack();
+		
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setResizable(false);  
 		window.setVisible(true);
@@ -42,12 +46,14 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
 	public Fanorona() {//{{{
 		setLayout(null);  
+		
+		
 		askGridSize();
-		setPreferredSize(new Dimension(rowSize*100+100,colSize*100+150));
+		setPreferredSize(new Dimension((rowSize+2)*100+40+BUTTON_SIZE_WIDTH,colSize*100+100));
 
         stateMachine = new StateMachine(rowSize, colSize);
 		add(stateMachine.grid);
-		stateMachine.grid.setBounds(1,51,rowSize*100+100,colSize*100+100); 
+		stateMachine.grid.setBounds(1,1,rowSize*100+100,colSize*100+100); 
 
         ai = new AI();
         aiIsOn = false;
@@ -70,7 +76,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         newGameButton = new JButton("New Game");
         aiButton = new JButton("Toggle AI");
         nameButton = new JButton("Change Name");
-        messageBox = new JLabel("",JLabel.CENTER);
+        messageBox = new JLabel("",JLabel.LEFT);
+        messageBox.setVerticalAlignment(JLabel.TOP);
         messageBox.setFont(new  Font("Serif", Font.BOLD, 14));
         messageBox.setForeground(Color.BLACK);
 
@@ -80,11 +87,12 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		add(nameButton);
 		add(messageBox);
 
-		newGameButton.setBounds(10, 10, 120, 30);
-		aiButton.setBounds(740, 10, 120, 30);
-		instructionsButton.setBounds(140, 10, 120, 30);
-		nameButton.setBounds(870, 10, 120, 30);
-		messageBox.setBounds(300, 10, 350, 30);
+		newGameButton.setBounds((rowSize+1)*100+10, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		instructionsButton.setBounds((rowSize+2)*100+35, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		nameButton.setBounds((rowSize+1)*100+10, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		aiButton.setBounds((rowSize+2)*100+35, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		
+		messageBox.setBounds((rowSize+1)*100+10, (BUTTON_SIZE_HEIGHT*2)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
     }//}}}
 
     public void mouseEntered(MouseEvent evt) {}
