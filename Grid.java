@@ -162,8 +162,7 @@ public class Grid extends JPanel{
         //drawing rows
         for(int y = MIN_GRID_WIDTH_INDEX + 1; y <= MAX_GRID_HEIGHT_INDEX + 1; y++)
         	g2d.draw(new Line2D.Float(MIN_GRID_WIDTH_INDEX+SQ_W, y*SQ_H, rowBorder+SQ_W, y*SQ_H));	
-	
-		//drawing diaganols
+   
         g2d.setStroke(new BasicStroke(3)); //line width
     	for(int x = MIN_GRID_WIDTH_INDEX + 1; x <= MAX_GRID_WIDTH_INDEX + 1; x++) {
     		for(int y = MIN_GRID_HEIGHT_INDEX + 1; y <= MAX_GRID_HEIGHT_INDEX + 1; y++) {
