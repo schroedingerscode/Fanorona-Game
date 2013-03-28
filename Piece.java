@@ -30,7 +30,7 @@ public class Piece {
     }
 
     public void move(Point destination) {
-    	x = destination.x;
+        x = destination.x;
     	y = destination.y;
     }
     
