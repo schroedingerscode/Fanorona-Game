@@ -15,10 +15,10 @@ public class StateMachine {
     Point prevDirection; //vector: Destination - Start
 
     //need to run() with a "NewGame" event before anything will happen
-    public StateMachine() {//{{{
+    public StateMachine(int rowSize, int colSize) {//{{{
         setState(State.GAME_OVER);
         //selectedPiece is not valid until MOVE states
-		grid = new Grid();  
+		grid = new Grid(rowSize, colSize);  
 		//win = 0;
         movesRemaining = maxMoves();
     }//}}}
@@ -138,7 +138,7 @@ public class StateMachine {
 
     private void newGame(Point p) {//{{{
         //the input is the board size #rows by #columns
-        numRows = p.x;
+//        numRows = p.x; // what is this supposed to be for? runtime error if i keep it
         clearTempData();
         movesRemaining = maxMoves();
         grid.reset();
