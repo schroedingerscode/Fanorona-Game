@@ -14,6 +14,8 @@ public class Piece {
     Image piecePic;
     Image highlight;
     Boolean isHighlighted;
+    
+    double resizeFactor;
 
     public Point position() { return new Point(x,y); }
 
@@ -34,16 +36,18 @@ public class Piece {
     	y = destination.y;
     }
     
-    Piece(Point pt, Boolean color) { 
+    Piece(Point pt, Boolean color, double changeFactor) { 
         x = pt.x;
         y = pt.y;
         initPiece(color);
+        resizeFactor = changeFactor;
     }
 
-    Piece(int _x, int _y, Boolean color) { 
+    Piece(int _x, int _y, Boolean color, double changeFactor) { 
         x = _x;
         y = _y;
         initPiece(color);
+        resizeFactor = changeFactor;
     }
 
     private void initPiece(Boolean colorIsWhite) {
@@ -64,10 +68,11 @@ public class Piece {
         int globalY = Grid.SQ_H*(y+1);
         //add the highlight image below the piece-to-be-drawn, -50 to center
         if(isHighlighted) {
-            g2d.drawImage(highlight, globalX - 50, globalY - 50, null);
+            g2d.drawImage(highlight, globalX - ((int)(50*resizeFactor)), globalY - ((int)(50*resizeFactor)), (int)(highlight.getWidth(null)*resizeFactor), (int)(highlight.getHeight(null)*resizeFactor), null);
         }
         //draw the actual piece image
         //x+1 for border, -45 to center 90x90 image
-        g2d.drawImage(piecePic, globalX - 45, globalY - 45, null);
+        //FIX THIS SHITJOIAFJAJF)(FU)**H)(@#R
+        g2d.drawImage(piecePic, globalX - ((int)(45*resizeFactor)), globalY - ((int)(45*resizeFactor)), (int)(piecePic.getWidth(null)*resizeFactor), (int)(piecePic.getHeight(null)*resizeFactor), null);
     }//}}}
 }
