@@ -9,16 +9,27 @@ public class StateMachine {
     public int movesRemaining;
     private int numRows = 5;
 
+    double resizeFactor;
+    
+    //timer per turn
+    Timer timer;
+    int timePerMove;
+    
     //data valid only in certain states
     private Piece selectedPiece;
     java.util.List<Point> prevPositions;
     Point prevDirection; //vector: Destination - Start
 
     //need to run() with a "NewGame" event before anything will happen
-    public StateMachine(int rowSize, int colSize) {//{{{
+    public StateMachine(int rowSize, int colSize, int speed, double changeFactor) {//{{{
         setState(State.GAME_OVER);
+        timer = new Timer();
+        timePerMove = speed;
+        
+        resizeFactor = changeFactor;
+        
         //selectedPiece is not valid until MOVE states
-		grid = new Grid(rowSize, colSize);  
+		grid = new Grid(rowSize, colSize, changeFactor);  
 		//win = 0;
         movesRemaining = maxMoves();
     }//}}}
@@ -51,15 +62,15 @@ public class StateMachine {
         String turnMsg = "<html>Turn #" + (maxMoves() - movesRemaining) + " <br>";
         switch(s) {
             case PLAYER_SELECT:
-                return turnMsg + "STATE: PLAYER_SELECT - White, please select a piece</html>";
+                return turnMsg + "STATE: PLAYER_SELECT<br><br>White, please select a piece</html>";
             case ENEMY_SELECT:
-                return turnMsg + "STATE: ENEMY_SELECT - Black, please select a piece</html>";
+                return turnMsg + "STATE: ENEMY_SELECT<br><br>Black, please select a piece</html>";
             case MOVE:
-                return turnMsg + "STATE: MOVE - Please move your selected piece</html>";
+                return turnMsg + "STATE: MOVE<br><br>Please move your selected piece</html>";
             case MOVE_AGAIN:
-                return turnMsg + "STATE: MOVE_AGAIN - Please move the same piece again. Currently, the decline functionality has not been implemented.</html>";
+                return turnMsg + "STATE: MOVE_AGAIN<br><br>Please move the same piece again. Currently, the decline functionality has not been implemented.</html>";
             case GAME_OVER:
-                return "STATE: GAME_OVER - To play again, please reset the board with the NEW_GAME button.</html>";
+                return "STATE: GAME_OVER<br><br>To play again, please reset the board with the NEW_GAME button.</html>";
         }
         return "ERROR: Reached invalid state";
     }//}}}
@@ -70,7 +81,7 @@ public class StateMachine {
 
     private void handleClick(Point globalPt) {//{{{
         //get clicked pt in grid coordinates
-        Point pt = Grid.asGridCoor(globalPt);
+        Point pt = Grid.asGridCoor(globalPt, resizeFactor);
         if(!grid.isOnGrid(pt)) { return; }
         //figure out if it is a space:0, ally piece:1, or enemy:-1
         int id = grid.getState()[pt.x][pt.y];
@@ -242,5 +253,6 @@ public class StateMachine {
     	}    	
     	return p;
     }//}}}
-
+    
+    
 }
