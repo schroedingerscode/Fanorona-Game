@@ -12,16 +12,16 @@ import java.util.List;
 public class Grid extends JPanel{
     private List<Piece> pieces;
     
-    // 0 <= width <= 13 (must be odd)
-    // 0 <= height <= 13 (must be odd)
     private int MIN_GRID_WIDTH_INDEX = 0;
-    private int MAX_GRID_WIDTH_INDEX;
+    private int MAX_GRID_WIDTH_INDEX; // 0 <= width <= 13 (must be odd)
     private int MIN_GRID_HEIGHT_INDEX = 0;
-    private int MAX_GRID_HEIGHT_INDEX;
-    static public int SQ_W  = 100; //Square width
-    static public int SQ_H  = 100; //Square height
+    private int MAX_GRID_HEIGHT_INDEX; // 0 <= height <= 13 (must be odd)
+    static int SQ_W = 100; //Square width
+    static int SQ_H = 100; //Square height
     private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
     private int MAXH = (MAX_GRID_HEIGHT_INDEX) * SQ_H;
+    
+    double resizeFactor;
     
     Image bkg;
 
@@ -29,22 +29,28 @@ public class Grid extends JPanel{
         return new Point(MAX_GRID_WIDTH_INDEX+1, MAX_GRID_HEIGHT_INDEX+1);
     }
     
-    static public Point asGridCoor(Point scrCoor) {//{{{
+    static public Point asGridCoor(Point scrCoor, double changeFactor) {//{{{
         //Screen coordinates to grid coordinates
         //assumes the grid is at 0,0
         //border is 1 grid square, rounds to nearest grid coor when inexact
-        //TODO, figure out why the +50 is needed
-        float unroundedX = ((scrCoor.x+50)/SQ_W)-1;
+        //TODO, figure out why the -220 is needed
+    	//TODO, add changeFactor in here 
+        float unroundedX = ((scrCoor.x-220)/SQ_W)-1;
         int x = (int) Math.floor(unroundedX + .5);
-        float unroundedY = (scrCoor.y/SQ_H)-1;
+        float unroundedY = ((scrCoor.y+50)/SQ_H)-1;
         int y = (int) Math.floor(unroundedY + .5);
         return new Point(x,y);
     }//}}}
 
-    public Grid(int rowSize, int colSize) { //{{{
+    public Grid(int rowSize, int colSize, double changeFactor) { //{{{
         super(); 
         MAX_GRID_WIDTH_INDEX = rowSize-1;
         MAX_GRID_HEIGHT_INDEX = colSize-1;
+        
+        SQ_W = (int)(100*changeFactor);
+        SQ_H = (int)(100*changeFactor);
+
+        resizeFactor = changeFactor;
         
         //load background image
         //assumes "cherry.png" is in the same directory as the .class files
@@ -108,7 +114,7 @@ public class Grid extends JPanel{
     public int[][] getState() {//{{{
         //returns a 2d array explaining the contents of each grid space
         //to be used by the AI. 1 = player, 0 = empty, -1 = enemy
-        int[][] state = new int[9][5]; //x,y
+        int[][] state = new int[MAX_GRID_WIDTH_INDEX+1][MAX_GRID_HEIGHT_INDEX+1]; //x,y
         for(Piece p : pieces) {
             if(p.isPlayer()) {
                 state[p.position().x][p.position().y] = 1;
@@ -168,9 +174,9 @@ public class Grid extends JPanel{
     		for(int y = MIN_GRID_HEIGHT_INDEX + 1; y <= MAX_GRID_HEIGHT_INDEX + 1; y++) {
     			if((x - y) % 2 == 0) {
     				if((x < MAX_GRID_WIDTH_INDEX + 1) && (y < MAX_GRID_HEIGHT_INDEX + 1))
-    					g2d.draw(new Line2D.Float(x*100, y*100, (x+1)*100, (y+1)*100));
+    					g2d.draw(new Line2D.Float(x*SQ_W, y*SQ_H, (x+1)*SQ_W, (y+1)*SQ_H));
     				if((x < MAX_GRID_WIDTH_INDEX + 1) && (y > MIN_GRID_HEIGHT_INDEX + 1))
-    					g2d.draw(new Line2D.Float(x*100, y*100, (x+1)*100, (y-1)*100));
+    					g2d.draw(new Line2D.Float(x*SQ_W, y*SQ_H, (x+1)*SQ_W, (y-1)*SQ_H));
     			}
     		}
     	}
@@ -321,7 +327,7 @@ public class Grid extends JPanel{
         //no gfx here, the drawing function goes off of stored data
         if(!(isOnGrid(coor) && isUnique(coor))) { return false; }
 
-        pieces.add(new Piece(coor, isAlly));
+        pieces.add(new Piece(coor, isAlly, resizeFactor));
         return true;
     }//}}}
     
