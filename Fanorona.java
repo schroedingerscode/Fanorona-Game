@@ -15,11 +15,20 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JButton nameButton;
 	private JButton aiButton;
 	private JLabel messageBox;  
+	private JLabel timerBox;
 
-	static public int BUTTON_SIZE_WIDTH  = 120;
-    static public int BUTTON_SIZE_HEIGHT = 30;
+	int BUTTON_SIZE_WIDTH = 120;
+	int BUTTON_SIZE_HEIGHT = 30;
+   
+	double xGridAndExcess;
+    double yGridAndExcess;
+	double xGridSize;
+	double yGridSize;
+	double changeFactor = 1.0;
 	
 	String playerName;
+	int timePerTurn;
+	
     int rowSize;
     int colSize;
     Boolean aiIsOn;
@@ -46,14 +55,41 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
 	public Fanorona() {//{{{
 		setLayout(null);  
-		
-		
 		askGridSize();
-		setPreferredSize(new Dimension((rowSize+2)*100+40+BUTTON_SIZE_WIDTH,colSize*100+100));
-
-        stateMachine = new StateMachine(rowSize, colSize);
+		askTimePerTurn();
+		
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		
+		//resize the grid
+		System.out.println("screenWidth: " + screenSize.getWidth());
+		System.out.println("screenHeight: " + screenSize.getHeight());
+		
+		xGridAndExcess = (rowSize*100)+(BUTTON_SIZE_WIDTH*2+130);
+		yGridAndExcess = (colSize*100)+100;
+		System.out.println("xGridAndExcess: " + xGridAndExcess);
+		System.out.println("yGridAndExcess: " + yGridAndExcess);
+		
+		if(xGridAndExcess > screenSize.getWidth() || yGridAndExcess > screenSize.getHeight()) {
+			xGridSize = screenSize.getWidth() - ((BUTTON_SIZE_WIDTH*2)+30);
+			yGridSize = screenSize.getHeight() - ((BUTTON_SIZE_HEIGHT*2)+30);
+			System.out.println("xGridSize: " + xGridSize);
+			System.out.println("yGridSize: " + yGridSize);
+			
+			if(xGridAndExcess >= yGridAndExcess) {
+				changeFactor = xGridSize / xGridAndExcess;
+				System.out.println("% change: " + (xGridSize / xGridAndExcess));
+			}
+			else {
+				changeFactor = yGridSize / yGridAndExcess;
+				System.out.println("% change: " + (yGridSize / yGridAndExcess));
+			}				
+		}
+		
+		setPreferredSize(new Dimension((BUTTON_SIZE_WIDTH*2+30)+((int)((rowSize*100+100)*changeFactor)),(int)((colSize*100+100)*changeFactor)));
+		stateMachine = new StateMachine(rowSize, colSize, timePerTurn, changeFactor);			
+		
 		add(stateMachine.grid);
-		stateMachine.grid.setBounds(1,1,rowSize*100+100,colSize*100+100); 
+		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((rowSize*100+100)*changeFactor),(int)((colSize*100+100)*changeFactor)); 
 
         ai = new AI();
         aiIsOn = false;
@@ -86,13 +122,13 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		add(instructionsButton);	
 		add(nameButton);
 		add(messageBox);
-
-		newGameButton.setBounds((rowSize+1)*100+10, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
-		instructionsButton.setBounds((rowSize+2)*100+35, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
-		nameButton.setBounds((rowSize+1)*100+10, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
-		aiButton.setBounds((rowSize+2)*100+35, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		
-		messageBox.setBounds((rowSize+1)*100+10, (BUTTON_SIZE_HEIGHT*2)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
+		newGameButton.setBounds(10, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		instructionsButton.setBounds(BUTTON_SIZE_WIDTH+20, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		nameButton.setBounds(10, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		aiButton.setBounds(BUTTON_SIZE_WIDTH+20, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
+		
+		messageBox.setBounds(10, (BUTTON_SIZE_HEIGHT*2)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
     }//}}}
 
     public void mouseEntered(MouseEvent evt) {}
@@ -179,6 +215,17 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
             	System.exit(0);
             	break;
         }    	
+    }
+    
+    // prompts user for time per turn
+    void askTimePerTurn() {
+    	JPanel panel = new JPanel();
+    	try {
+    		String value = JOptionPane.showInputDialog(null, "Enter a time limit per turn (milliseconds): (If no time limit is wanted, just leave blank.)", "", JOptionPane.PLAIN_MESSAGE);
+    		if(value == null)
+    			System.exit(0);
+    		timePerTurn = Integer.parseInt(value);
+    	} catch(NumberFormatException e) {}
     }
     
     void changeName() {//{{{
