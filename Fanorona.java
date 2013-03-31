@@ -92,7 +92,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			System.out.println("xGridSize: " + xGridSize);
 			System.out.println("yGridSize: " + yGridSize);
 			
-			if(xGridAndExcess >= yGridAndExcess) {
+			if((xGridAndExcess-screenSize.getWidth()) >= (yGridAndExcess-screenSize.getHeight())) {
 				changeFactor = xGridSize / xGridAndExcess;
 				System.out.println("% change: " + (xGridSize / xGridAndExcess));
 			}
