@@ -141,7 +141,7 @@ public class StateMachine {
                 break;
             case MOVE_AGAIN:
                 //decline to move
-            	deselectPiece();  //this should take care of the decline to move state
+            	deselectPiece();
                 endTurn();
                 break;
             //the other states do not respond to "RClick" events
