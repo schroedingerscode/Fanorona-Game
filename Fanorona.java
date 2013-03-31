@@ -17,9 +17,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JButton aiButton;
 	private JLabel messageBox;  
 	private JLabel timerBox;
-	
+
 	static final int LOOP_CONTINUOUSLY = 9999;
-	
 	int BUTTON_SIZE_WIDTH = 120;
 	int BUTTON_SIZE_HEIGHT = 30;
    
