@@ -201,7 +201,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     	JComboBox networkConfigBox = new JComboBox(networkConfig);
     	panel.add(networkConfigBox);
     	
-    	int result = JOptionPane.showConfirmDialog(null, panel, "Choose Fanorona Grid Size", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    	int result = JOptionPane.showConfirmDialog(null, panel, "Choose Game Network Configuration", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
     	switch (result) {
     		case JOptionPane.OK_OPTION:
     			networkSetting = (String)networkConfigBox.getSelectedItem();
@@ -245,7 +245,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     
     // prompts user for time per turn
     void askTimePerTurn() {
-    	JPanel panel = new JPanel();
+    	//JPanel panel = new JPanel();
     	try {
     		String value = JOptionPane.showInputDialog(null, "Enter a time limit per turn (milliseconds): (If no time limit is wanted, just leave blank.)", "", JOptionPane.PLAIN_MESSAGE);
     		if(value == null)
