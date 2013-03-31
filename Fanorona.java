@@ -76,8 +76,12 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 				socketOut = new ObjectOutputStream(acceptSocket.getOutputStream());
 				socketOut.flush();
 			    socketIn = new ObjectInputStream(acceptSocket.getInputStream());
+			    String welcome = "WELCOME";
+			    socketOut.writeObject(welcome);
+			    socketOut.flush();
 			} catch (IOException e) {}
 			sendGameInfo(socketOut, colSize, rowSize, timePerTurn);
+			waitForClient(socketIn, socketOut);
 		} else if (networkSetting == "Client") {
 			getClientConfig();
 			receiveGameInfo();
@@ -298,6 +302,19 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			m_socketOut.flush();
 		}
 		catch(IOException ioException){}
+    }
+    
+    void waitForClient(ObjectInputStream m_socketIn, ObjectOutputStream m_socketOut) {
+    	try {
+	    	String message = "";
+	    	while(!message.equals("READY")) {
+	    		message = (String)m_socketIn.readObject();
+	    		System.out.println("Client: " + message);
+	    	}
+	    	String response = "BEGIN";
+	    	m_socketOut.writeObject(response);
+	    	m_socketOut.flush();
+    	} catch (Exception e) {}
     }
     
     void receiveGameInfo() {
