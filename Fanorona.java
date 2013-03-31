@@ -198,10 +198,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         	rows.addElement(n);
         	cols.addElement(n);
         }
-        JComboBox rowsBox = new JComboBox(rows);
-        panel.add(rowsBox);
         JComboBox colsBox = new JComboBox(cols);
         panel.add(colsBox);
+        JComboBox rowsBox = new JComboBox(rows);
+        panel.add(rowsBox);
         
         int result = JOptionPane.showConfirmDialog(null, panel, "Choose Fanorona Grid Size", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         switch (result) {
