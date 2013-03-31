@@ -29,6 +29,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	String playerName;
 	int timePerTurn;
 	
+	String networkSetting;
     int rowSize;
     int colSize;
     Boolean aiIsOn;
@@ -54,7 +55,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	}//}}}
 
 	public Fanorona() {//{{{
-		setLayout(null);  
+		setLayout(null); 
+		askServerClientInfo();
 		askGridSize();
 		askTimePerTurn();
 		
@@ -188,6 +190,30 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         
     }//}}}
 
+    //asks the user if the game is to be played in a server/client config
+    void askServerClientInfo() {
+    	JPanel panel = new JPanel();
+    	panel.add(new JLabel("Please choose what network function you would like this game instance to perform: "));
+    	DefaultComboBoxModel networkConfig = new DefaultComboBoxModel();
+    	networkConfig.addElement("Just Play a Local Game");
+    	networkConfig.addElement("Server");
+    	networkConfig.addElement("Client");
+    	JComboBox networkConfigBox = new JComboBox(networkConfig);
+    	panel.add(networkConfigBox);
+    	
+    	int result = JOptionPane.showConfirmDialog(null, panel, "Choose Fanorona Grid Size", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    	switch (result) {
+    		case JOptionPane.OK_OPTION:
+    			networkSetting = (String)networkConfigBox.getSelectedItem();
+    			System.out.println("network: " + networkSetting);
+    			break;
+    		default:
+    			System.exit(0);
+    			break;
+    				
+    	}
+    }
+    
     //asks the user for a grid size (row, col)
     void askGridSize() {
     	JPanel panel = new JPanel();
