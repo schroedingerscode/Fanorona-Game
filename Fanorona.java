@@ -4,7 +4,8 @@ import javax.swing.*;
 import java.util.*;
 import javax.sound.midi.*;
 import javax.swing.JOptionPane;
-import java.net.URL;  
+import java.net.*;  
+import java.io.*;
 
 public class Fanorona extends JPanel implements ActionListener, MouseListener {
     StateMachine stateMachine; //contains grid
@@ -68,8 +69,19 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			getServerConfig();
 			askGridSize();
 			askTimePerTurn();
+			ObjectOutputStream socketOut = null;
+			ObjectInputStream socketIn = null;
+			Socket acceptSocket = null;
+			try {
+				acceptSocket = setupServerSockets();
+				socketOut = new ObjectOutputStream(acceptSocket.getOutputStream());
+				socketOut.flush();
+			    socketIn = new ObjectInputStream(acceptSocket.getInputStream());
+			} catch (IOException e) {}
+			sendGameInfo(socketOut, colSize, rowSize, timePerTurn);
 		} else if (networkSetting == "Client") {
 			getClientConfig();
+			receiveGameInfo();
 			//need to accept grid size and time from server info
 		} else {
 			askGridSize();
@@ -232,6 +244,29 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     	}
     }
     
+    Socket setupServerSockets() throws IOException {
+    	ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(serverPort);
+        } catch (IOException e) {
+            System.err.println("Could not listen on port: " + serverPort + ".");
+            System.exit(1);
+        }
+        
+        /*String socketNotice = "Fanarona will continue once a client connects to the server.\nPress OK to dismiss this message and continue.";
+        JOptionPane.showMessageDialog(this, socketNotice, "Waiting for client connect...", JOptionPane.PLAIN_MESSAGE);*/
+
+        Socket acceptSocket = null;
+        try {
+            acceptSocket = serverSocket.accept();
+        } catch (IOException e) {
+            System.err.println("Accept failed.");
+            System.exit(1);
+        }
+        
+        return acceptSocket;
+    }
+    
     void getServerConfig() {
     	try {
     		String value = JOptionPane.showInputDialog(null, "What port should the server listen on? (Leave Blank for Default Fanarona Port 8725)", "Server Port Configuration", JOptionPane.QUESTION_MESSAGE);
@@ -254,6 +289,20 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     			System.exit(0);
     		clientPort = Integer.parseInt(value);
     	} catch(NumberFormatException e) {}
+    }
+    
+    void sendGameInfo(ObjectOutputStream m_socketOut, int cols, int rows, int timeout) {
+    	//send game info over the socket
+    	try{
+    		String gameInfoMessage = "INFO " + cols + " " + rows + " B " + timeout;
+			m_socketOut.writeObject(gameInfoMessage);
+			m_socketOut.flush();
+		}
+		catch(IOException ioException){}
+    }
+    
+    void receiveGameInfo() {
+    	//get game info from the socket
     }
     
     //asks the user for a grid size (row, col)
