@@ -30,6 +30,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	int timePerTurn;
 	
 	String networkSetting;
+	String serverName;
+	int serverPort = 8725;
+	int clientPort = 8725;
+	
     int rowSize;
     int colSize;
     Boolean aiIsOn;
@@ -57,8 +61,19 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	public Fanorona() {//{{{
 		setLayout(null); 
 		askServerClientInfo();
-		askGridSize();
-		askTimePerTurn();
+		if(networkSetting == "Server") {
+			getServerConfig();
+			askGridSize();
+			askTimePerTurn();
+		} else if (networkSetting == "Client") {
+			getClientConfig();
+			//need to accept grid size and time from server info
+		} else {
+			askGridSize();
+			askTimePerTurn();
+		}
+		//askGridSize();
+		//askTimePerTurn();
 		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
@@ -66,8 +81,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		System.out.println("screenWidth: " + screenSize.getWidth());
 		System.out.println("screenHeight: " + screenSize.getHeight());
 		
-		xGridAndExcess = (rowSize*100)+(BUTTON_SIZE_WIDTH*2+130);
-		yGridAndExcess = (colSize*100)+100;
+		xGridAndExcess = (colSize*100)+(BUTTON_SIZE_WIDTH*2+130);
+		yGridAndExcess = (rowSize*100)+100;
 		System.out.println("xGridAndExcess: " + xGridAndExcess);
 		System.out.println("yGridAndExcess: " + yGridAndExcess);
 		
@@ -87,11 +102,11 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			}				
 		}
 		
-		setPreferredSize(new Dimension((BUTTON_SIZE_WIDTH*2+30)+((int)((rowSize*100+100)*changeFactor)),(int)((colSize*100+100)*changeFactor)));
-		stateMachine = new StateMachine(rowSize, colSize, timePerTurn, changeFactor);			
+		setPreferredSize(new Dimension((BUTTON_SIZE_WIDTH*2+30)+((int)((colSize*100+100)*changeFactor)),(int)((rowSize*100+100)*changeFactor)));
+		stateMachine = new StateMachine(colSize, rowSize, timePerTurn, changeFactor);			
 		
 		add(stateMachine.grid);
-		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((rowSize*100+100)*changeFactor),(int)((colSize*100+100)*changeFactor)); 
+		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((colSize*100+100)*changeFactor),(int)((rowSize*100+100)*changeFactor)); 
 
         ai = new AI();
         aiIsOn = false;
@@ -214,20 +229,47 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     	}
     }
     
+    void getServerConfig() {
+    	try {
+    		String value = JOptionPane.showInputDialog(null, "What port should the server listen on? (Leave Blank for Default Fanarona Port 8725)", "Server Port Configuration", JOptionPane.QUESTION_MESSAGE);
+    		if(value == null)
+    			System.exit(0);
+    		serverPort = Integer.parseInt(value);
+    	} catch(NumberFormatException e) {}
+    }
+    
+    void getClientConfig() {
+    	try {
+    		String value = JOptionPane.showInputDialog(null, "Please enter the hostname of the server you wish to connect.", "Server Hostname", JOptionPane.QUESTION_MESSAGE);
+    		if(value == null)
+    			System.exit(0);
+    		serverName = value;
+    	} catch(NumberFormatException e) {}
+    	try {
+    		String value = JOptionPane.showInputDialog(null, "What port should the client connect on? (Leave Blank for Default Fanarona Port 8725)", "Server Port Configuration", JOptionPane.QUESTION_MESSAGE);
+    		if(value == null)
+    			System.exit(0);
+    		clientPort = Integer.parseInt(value);
+    	} catch(NumberFormatException e) {}
+    }
+    
     //asks the user for a grid size (row, col)
     void askGridSize() {
     	JPanel panel = new JPanel();
     	panel.add(new JLabel("Choose a Fanorona board size (row, column): "));
     	DefaultComboBoxModel rows = new DefaultComboBoxModel();
     	DefaultComboBoxModel cols = new DefaultComboBoxModel();
-        for(int n = 1; n <= 13; n+=2) {
+        
+    	for(int n = 1; n <= 13; n+=2) {
         	rows.addElement(n);
         	cols.addElement(n);
         }
-        JComboBox colsBox = new JComboBox(cols);
-        panel.add(colsBox);
+    	rows.setSelectedItem(rows.getElementAt(2));
+    	cols.setSelectedItem(cols.getElementAt(4));
         JComboBox rowsBox = new JComboBox(rows);
         panel.add(rowsBox);
+        JComboBox colsBox = new JComboBox(cols);
+        panel.add(colsBox);
         
         int result = JOptionPane.showConfirmDialog(null, panel, "Choose Fanorona Grid Size", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         switch (result) {
