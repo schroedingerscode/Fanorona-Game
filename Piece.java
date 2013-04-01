@@ -15,7 +15,7 @@ public class Piece {
     Image highlight;
     Boolean isHighlighted;
     
-    double resizeFactor;
+    Grid g;
 
     public Point position() { return new Point(x,y); }
 
@@ -36,22 +36,21 @@ public class Piece {
     	y = destination.y;
     }
     
-    Piece(Point pt, Boolean color, double changeFactor) { 
+    Piece(Point pt, Boolean color, Grid g) { 
         x = pt.x;
         y = pt.y;
-        initPiece(color);
-        resizeFactor = changeFactor;
+        initPiece(color, g);
     }
 
-    Piece(int _x, int _y, Boolean color, double changeFactor) { 
+    Piece(int _x, int _y, Boolean color, Grid g) { 
         x = _x;
         y = _y;
-        initPiece(color);
-        resizeFactor = changeFactor;
+        initPiece(color, g);
     }
 
-    private void initPiece(Boolean colorIsWhite) {
+    private void initPiece(Boolean colorIsWhite, Grid _g) {
         //meat of the constructor, shared between the two
+        g = _g;
         color = colorIsWhite;
         isHighlighted = false;
         //load piece image
@@ -64,15 +63,20 @@ public class Piece {
     }
 
     public void drawPiece(Graphics2D g2d) {//{{{
-        int globalX = Grid.SQ_W*(x+1);
-        int globalY = Grid.SQ_H*(y+1);
-        //add the highlight image below the piece-to-be-drawn, -50 to center
+        double resizeFactor = g.resizeFactor;
+        Point globalPt = g.asGlobalCoor(x,y);
+        System.out.println("Add: " + x + " " + y);
+        int globalX = globalPt.x;
+        int globalY = globalPt.y;
+        //add the highlight image below the piece-to-be-drawn
+        double fullW = (int)(highlight.getWidth(null)*resizeFactor);
+        double fullH = (int)(highlight.getHeight(null)*resizeFactor);
         if(isHighlighted) {
-            g2d.drawImage(highlight, globalX - ((int)(50*resizeFactor)), globalY - ((int)(50*resizeFactor)), (int)(highlight.getWidth(null)*resizeFactor), (int)(highlight.getHeight(null)*resizeFactor), null);
+            g2d.drawImage(highlight, globalX, globalY, (int)fullW, (int)fullH, null);
         }
         //draw the actual piece image
-        //x+1 for border, -45 to center 90x90 image
-        //FIX THIS SHITJOIAFJAJF)(FU)**H)(@#R
-        g2d.drawImage(piecePic, globalX - ((int)(45*resizeFactor)), globalY - ((int)(45*resizeFactor)), (int)(piecePic.getWidth(null)*resizeFactor), (int)(piecePic.getHeight(null)*resizeFactor), null);
+        double pieceW = (piecePic.getWidth(null)*resizeFactor);
+        double pieceH = (piecePic.getHeight(null)*resizeFactor);
+        g2d.drawImage(piecePic, globalX + (int)((.5*fullW) - (.5*pieceW)), globalY + (int) ((.5*fullH) - (.5*pieceH)), (int)(piecePic.getWidth(null)*resizeFactor), (int)(piecePic.getHeight(null)*resizeFactor), null);
     }//}}}
 }

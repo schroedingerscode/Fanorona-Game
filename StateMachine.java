@@ -151,10 +151,10 @@ public class StateMachine {
     
     private void handleClick(Point globalPt) {//{{{
         //get clicked pt in grid coordinates
-        Point pt = Grid.asGridCoor(globalPt, resizeFactor);
+        Point pt = grid.asGridCoor(globalPt);
         if(!grid.isOnGrid(pt)) { return; }
         //figure out if it is a space:0, ally piece:1, or enemy:-1
-        int id = grid.getState()[pt.x][pt.y];
+        int id = grid.getState()[pt.x-1][pt.y-1];
 
         System.out.println("Clicked: " + pt.x + ", " + pt.y);
         //if(endFlag) handleRemoteInput();

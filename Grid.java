@@ -1,6 +1,6 @@
 //The (9x5) game board class which stores references to all pieces
 //and manages their positions.
-//The y-axis is inverted so (0,0) is in the top left.
+//The y-axis is NOT inverted so (1,1) is in the bottom left.
 //The x-axis is normal.
 
 import java.awt.*;
@@ -16,8 +16,8 @@ public class Grid extends JPanel{
     private int MAX_GRID_WIDTH_INDEX; // 0 <= width <= 13 (must be odd)
     private int MIN_GRID_HEIGHT_INDEX = 0;
     private int MAX_GRID_HEIGHT_INDEX; // 0 <= height <= 13 (must be odd)
-    static int SQ_W = 100; //Square width
-    static int SQ_H = 100; //Square height
+    public int SQ_W = 100; //Square width including resizeFactor
+    public int SQ_H = 100; //Square height including resizeFactor
     private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
     private int MAXH = (MAX_GRID_HEIGHT_INDEX) * SQ_H;
     
@@ -28,18 +28,34 @@ public class Grid extends JPanel{
     public Point dimensions() {
         return new Point(MAX_GRID_WIDTH_INDEX+1, MAX_GRID_HEIGHT_INDEX+1);
     }
+
+    public Point asGlobalCoor(double gridX, double gridY) {
+        //inverse transform of asGridCoor w/o initial shift
+        //allows for decimal inputs
+        double numRows = (double) MAX_GRID_HEIGHT_INDEX + 1;
+        double oldPtX = gridX - 1;
+        double oldPtY = numRows - gridY;
+        double W = (double) SQ_W;
+        double H = (double) SQ_H;
+        double x = (((double) oldPtX + .5) * W);// + 270;
+        double y = (((double) oldPtY + .5) * H);// + 0.0;
+        return new Point((int) x, (int) y);
+    }
     
-    static public Point asGridCoor(Point scrCoor, double changeFactor) {//{{{
+    public Point asGridCoor(Point scrCoor) {//{{{
         //Screen coordinates to grid coordinates
-        //assumes the grid is at 0,0
-        //border is 1 grid square, rounds to nearest grid coor when inexact
-        //TODO, figure out why the -220 is needed
-    	//TODO, add changeFactor in here 
-        float unroundedX = ((scrCoor.x-220)/SQ_W)-1;
-        int x = (int) Math.floor(unroundedX + .5);
-        float unroundedY = ((scrCoor.y+50)/SQ_H)-1;
-        int y = (int) Math.floor(unroundedY + .5);
-        return new Point(x,y);
+        //TL of grid is at (270,0) as buttons are 120 each *2 + 3 10px spaces
+        //shift to origin, scale down, shift to center of piece
+        //(SQ_W includes resizeFactor already)
+        double W = (double) SQ_W;
+        double H = (double) SQ_H;
+        double x = (((double)scrCoor.x-270)/W) - .5;
+        double y = (((double)scrCoor.y-0.0)/H) - .5;
+        Point oldPt = new Point((int) Math.floor(x),(int) Math.floor(y));
+        System.out.println("OldPt: " + oldPt.x + " " + oldPt.y);
+        //convert from top-left at (0,0) to bottom-right at (1,1)
+        int numRows = MAX_GRID_HEIGHT_INDEX+1;
+        return new Point(oldPt.x + 1, numRows - oldPt.y);
     }//}}}
 
     public Grid(int rowSize, int colSize, double changeFactor) { //{{{
@@ -113,14 +129,16 @@ public class Grid extends JPanel{
     private void kill(Piece p) { pieces.remove(p); }
 
     public int[][] getState() {//{{{
+        //WARNING - Now that pieces are no longer 0 indexed, you must subtract
+        //  1 from x & y when accessing this array
         //returns a 2d array explaining the contents of each grid space
         //to be used by the AI. 1 = player, 0 = empty, -1 = enemy
         int[][] state = new int[MAX_GRID_WIDTH_INDEX+1][MAX_GRID_HEIGHT_INDEX+1]; //x,y
         for(Piece p : pieces) {
             if(p.isPlayer()) {
-                state[p.position().x][p.position().y] = 1;
+                state[p.position().x-1][p.position().y-1] = 1;
             } else {
-                state[p.position().x][p.position().y] = -1;
+                state[p.position().x-1][p.position().y-1] = -1;
             }
         }
         //all other spaces were initialized to 0
@@ -209,10 +227,10 @@ public class Grid extends JPanel{
     public Boolean isOnGrid(Point coor) {//{{{
         //Req: is on grid
         //     is unique
-        if(coor.x < MIN_GRID_WIDTH_INDEX || coor.x > MAX_GRID_WIDTH_INDEX) {
+        if(coor.x < MIN_GRID_WIDTH_INDEX+1 || coor.x > MAX_GRID_WIDTH_INDEX+1) {
             return false; 
         }
-        if(coor.y < MIN_GRID_HEIGHT_INDEX || coor.y > MAX_GRID_HEIGHT_INDEX) {
+        if(coor.y < MIN_GRID_HEIGHT_INDEX+1 || coor.y > MAX_GRID_HEIGHT_INDEX+1) {
             return false; 
         }
         return true;
@@ -328,7 +346,7 @@ public class Grid extends JPanel{
         //no gfx here, the drawing function goes off of stored data
         if(!(isOnGrid(coor) && isUnique(coor))) { return false; }
 
-        pieces.add(new Piece(coor, isAlly, resizeFactor));
+        pieces.add(new Piece(coor, isAlly, this));
         return true;
     }//}}}
     
@@ -344,20 +362,20 @@ public class Grid extends JPanel{
     	int count = 0;
     	for(int x = MIN_GRID_WIDTH_INDEX; x <= MAX_GRID_WIDTH_INDEX; x++) {
     		for(int y = MIN_GRID_HEIGHT_INDEX; y < MAX_GRID_HEIGHT_INDEX / 2; y++)
-	    		addPiece(false, new Point(x, y));
+	    		addPiece(true, new Point(x+1, y+1));
     		for(int y = (MAX_GRID_HEIGHT_INDEX / 2) + 1; y <= MAX_GRID_HEIGHT_INDEX; y++)
-    			addPiece(true, new Point(x, y));
+    			addPiece(false, new Point(x+1, y+1));
     		if(x < MAX_GRID_WIDTH_INDEX / 2) {
     			if(count % 2 == 0)
-    				addPiece(false, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    				addPiece(false, new Point(x+1, MAX_GRID_HEIGHT_INDEX / 2+1));
     			else
-    				addPiece(true, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    				addPiece(true, new Point(x+1, MAX_GRID_HEIGHT_INDEX / 2+1));
     		}
     		else if(x > MAX_GRID_WIDTH_INDEX / 2) {
     			if(count % 2 == 0)
-    				addPiece(true, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    				addPiece(true, new Point(x+1, MAX_GRID_HEIGHT_INDEX / 2+1));
     			else
-    				addPiece(false, new Point(x, MAX_GRID_HEIGHT_INDEX / 2));
+    				addPiece(false, new Point(x+1, MAX_GRID_HEIGHT_INDEX / 2+1));
     		}
     		count++;
     	}
