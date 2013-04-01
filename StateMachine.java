@@ -119,7 +119,7 @@ public class StateMachine {
             		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
             		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
                     	System.out.println("LARGE REMOTE MOVE");
-                        this.movePiece(movePoint);
+                        this.movePiece(movePoint, false);
                         clearTempData();
                         if(outOfMoves()) { 
                             grid.loseMessage();
@@ -136,7 +136,7 @@ public class StateMachine {
         		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
         		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
                 	System.out.println("REMOTE MOVE");
-                    this.movePiece(movePoint);
+                    this.movePiece(movePoint, false);
                     clearTempData();
                     if(outOfMoves()) { 
                         grid.loseMessage();
@@ -169,8 +169,6 @@ public class StateMachine {
                 } //else do nothing
                 break;
             case ENEMY_SELECT:
-                grid.killSacrifices(false);
-                grid.repaint();
             	endFlag = false;
                 if(id == -1) {
 	                System.out.println("ENEMY_SELECT");
@@ -182,8 +180,11 @@ public class StateMachine {
                 if(id == 0) { //empty space
                     if (grid.isValidMove(selectedPiece.position(), pt)) {
                     	System.out.println("MOVE");
-                        this.movePiece(pt);
+                        this.movePiece(pt, false);
                         handleChainedMove(); //sets next state
+                    } else if(grid.isValidPaikaMove(selectedPiece.position(), pt)) {
+                        this.movePiece(pt, true);
+                        endTurn();
                     } else { grid.illegalMove(); }
                 }  
                 //same piece -> want to sacrifice it
@@ -200,7 +201,7 @@ public class StateMachine {
                     //selectedPiece has been updated since last move
                     if(grid.isValidDoubleMove(selectedPiece.position(), pt, prevPositions, prevDirection)) {
                     	System.out.println("MOVE AGAIN");
-                        this.movePiece(pt);
+                        this.movePiece(pt, false);
                         handleChainedMove(); //sets next state
                     } else { grid.illegalDoubleMove(); }
                 }
@@ -321,13 +322,17 @@ public class StateMachine {
         grid.repaint();
     }//}}}
 
-    private void movePiece(Point pt) {//{{{
+    private void movePiece(Point pt, Boolean isPaika) {//{{{
         deselectPiece();
 
         Point oldPt = selectedPiece.position();
         prevPositions.add(oldPt);
         prevDirection = getDirection(oldPt, pt);
-        moveString += grid.movePiece(selectedPiece.position(), pt);
+        if(isPaika) {
+            grid.movePaika(selectedPiece.position(), pt);
+        } else {
+            moveString += grid.movePiece(selectedPiece.position(), pt);
+        }
         //propagate updated position to local copy
         selectedPiece = grid.getPieceAt(pt);
     }//}}}

@@ -97,6 +97,13 @@ public class Grid extends JPanel{
         }
     }//}}}
 
+    public void movePaika(Point a, Point b) {//{{{
+        //assumes you already checked that the move was valid
+    	Piece p = getPieceAt(a);
+        p.move(b);
+        repaint();
+    }//}}}
+
     public String movePiece(Point a, Point b) {//{{{
         //assumes you already checked that the move was valid
     	Piece p = getPieceAt(a);
@@ -304,6 +311,7 @@ public class Grid extends JPanel{
     }//}}}
 
     public Boolean isValidMove(Point a, Point b) {//{{{
+        //technically it should be called isValidCaptureMove
         //restrictions:
         //  must capture if possible
         //isUnique to make sure the space is empty
@@ -311,8 +319,13 @@ public class Grid extends JPanel{
         System.out.println("Adjacent: " + isAdjacent(a,b));
         System.out.println("OnGrid: " + isOnGrid(b));
         System.out.println("Unqiue: " + isUnique(b));
-        return canKill(a,b) && isAdjacent(a,b) && isOnGrid(b) && isUnique(b);
+        return isValidPaikaMove(a,b) && canKill(a,b);
     }//}}}
+
+    public Boolean isValidPaikaMove(Point a, Point b) {
+        //on board, adjacent, empty
+        return isOnGrid(b) && isAdjacent(a,b) && isUnique(b);
+    }
 
     //!!!WARNING untested
     //public List<Point> getValidMoves(Point a) {//{{{
