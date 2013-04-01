@@ -109,6 +109,7 @@ public class StateMachine {
             System.out.println("Waiting...");
             try{coords = (String)in.readObject();} catch (Exception e) {}
             System.out.println("ZZZZ: " + coords);
+            if(!coords.isEmpty()){
             if(coords.contains("+")) {
             	String[] coordsMajorArray = coords.split("\\+ ");
             	for(int i = 0; i < coordsMajorArray.length; i++) {
@@ -144,6 +145,7 @@ public class StateMachine {
                     }
                     movesRemaining--;
                 } else { grid.illegalMove(); }
+            }
             }
     }//}}}
     
@@ -276,9 +278,11 @@ public class StateMachine {
         
         endFlag=true;
         
-        try {
-			SwingUtilities.invokeLater(new Runnable() {public void run() {handleRemoteInput();}});
-		} catch (Exception e) {}
+        if(networkSetting.equals("Server") || networkSetting.equals("Client")){
+	        try {
+				SwingUtilities.invokeLater(new Runnable() {public void run() {handleRemoteInput();}});
+			} catch (Exception e) {}
+        }
         
     }//}}}
 
