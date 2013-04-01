@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import javax.swing.SwingUtilities;
 
 //Purpose: Takes ambiguous state-dependent user actions & decides what to do
-//TODO somebody: block state change during animation (real thread blocking)
 public class StateMachine {
     public Grid grid;
     private State s;
@@ -42,7 +41,6 @@ public class StateMachine {
         
         //selectedPiece is not valid until MOVE states
 		grid = new Grid(rowSize, colSize, changeFactor);  
-		//win = 0;
         movesRemaining = maxMoves();
         
         networkSetting = m_networkSetting;

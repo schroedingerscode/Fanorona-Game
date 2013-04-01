@@ -52,7 +52,7 @@ public class AI {
         return (a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0);
     }
 
-    ArrayList<Move> getValidMoves(int[][] gameState) {
+    ArrayList<Move> getValidMoves(int[][] gameState) {//{{{
     	
     	
     	//For our current board, we want to find all of the black pawns on the board.
@@ -359,7 +359,7 @@ public class AI {
 	    }    
 	    return validMoves;
     
-    }
+    }//}}}
 	
     int[][] alphaBetaSearch(int[][] gameState){
 
@@ -411,17 +411,22 @@ public class AI {
         return bestMove;
     }
 
+    private Move convertToNewCoorSystem(Move m, int numRows) {
+        Point a = Grid.convertToNewCoorSystem(m.getStartPoint(), numRows);
+        Point b = Grid.convertToNewCoorSystem(m.getEndPoint(), numRows);
+    	//System.out.println("Pt a" + a.x + " " + a.y); //TEMP DEBUG
+    	//System.out.println("Pt b" + b.x + " " + b.y); //TEMP DEBUG
+        return new Move(a.x, a.y, b.x, b.y);
+    }
+
     public Move getMove(int[][] gridState) {
-        //returns a list of points (grid coor) specifying the move
-        //1 - selected piece
-        //2 - space to move to
-        //3,4 - repeated move
-        // repeat as necessary
+        //returns a Move which is 2 pts: start & end
     	ArrayList<Move> allMoves = getValidMoves(gridState);
     	Move bestMove = allMoves.get(0);
+
     	System.out.println("AI.JAVA " + bestMove.startPointX + " " + bestMove.startPointY);
     	System.out.println("AI.JAVA " + bestMove.endPointX + " " + bestMove.endPointY);
     	
-        return bestMove;
+        return convertToNewCoorSystem(bestMove, MAX_GRID_HEIGHT_INDEX+1);
     }
 }

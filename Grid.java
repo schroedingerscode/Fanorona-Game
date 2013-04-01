@@ -41,6 +41,11 @@ public class Grid extends JPanel{
         double y = (((double) oldPtY + .5) * H);// + 0.0;
         return new Point((int) x, (int) y);
     }
+
+    static public Point convertToNewCoorSystem(Point oldPt, int numRows) {
+        //convert from top-left at (0,0) to bottom-right at (1,1)
+        return new Point(oldPt.x + 1, numRows - oldPt.y);
+    }
     
     public Point asGridCoor(Point scrCoor) {//{{{
         //Screen coordinates to grid coordinates
@@ -52,10 +57,7 @@ public class Grid extends JPanel{
         double x = (((double)scrCoor.x-270)/W) - .5;
         double y = (((double)scrCoor.y-0.0)/H) - .5;
         Point oldPt = new Point((int) Math.floor(x),(int) Math.floor(y));
-        System.out.println("OldPt: " + oldPt.x + " " + oldPt.y);
-        //convert from top-left at (0,0) to bottom-right at (1,1)
-        int numRows = MAX_GRID_HEIGHT_INDEX+1;
-        return new Point(oldPt.x + 1, numRows - oldPt.y);
+        return convertToNewCoorSystem(oldPt, MAX_GRID_HEIGHT_INDEX+1);
     }//}}}
 
     public Grid(int rowSize, int colSize, double changeFactor) { //{{{

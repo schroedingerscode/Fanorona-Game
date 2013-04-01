@@ -213,11 +213,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
             points.add(startLocation);
             points.add(endLocation);
             
-            System.out.println("INSIDE OF FANORONA.JAVA " + move.startPointX + " " + move.startPointY);
-            System.out.println("INSIDE OF FANORONA.JAVA " + move.endPointX + " " + move.endPointY);
 
             //feed all the points to the state machine
             for(Point p : points) {
+                System.out.println("INSIDE OF FANORONA.JAVA " + p.x + " " + p.y);
                 String message = stateMachine.run("Click", p);
                 messageBox.setText(message);
             }

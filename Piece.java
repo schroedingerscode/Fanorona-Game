@@ -65,7 +65,6 @@ public class Piece {
     public void drawPiece(Graphics2D g2d) {//{{{
         double resizeFactor = g.resizeFactor;
         Point globalPt = g.asGlobalCoor(x,y);
-        System.out.println("Add: " + x + " " + y);
         int globalX = globalPt.x;
         int globalY = globalPt.y;
         //add the highlight image below the piece-to-be-drawn
