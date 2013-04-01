@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.util.*;
 import javax.sound.midi.*;
 import javax.swing.JOptionPane;
+
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;  
 import java.io.*;
 
@@ -35,6 +37,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	String serverName;
 	int serverPort = 8725;
 	int clientPort = 8725;
+	String clientStartingSide = "B";
 	
     int rowSize;
     int colSize;
@@ -64,12 +67,12 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	public Fanorona() {//{{{
 		setLayout(null); 
 		askServerClientInfo();
+		ObjectOutputStream socketOut = null;
+		ObjectInputStream socketIn = null;
 		if(networkSetting == "Server") {
 			getServerConfig();
 			askGridSize();
 			askTimePerTurn();
-			ObjectOutputStream socketOut = null;
-			ObjectInputStream socketIn = null;
 			Socket acceptSocket = null;
 			try {
 				acceptSocket = setupServerSockets();
@@ -85,8 +88,6 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			waitForClient(socketIn, socketOut);
 		} else if (networkSetting == "Client") {
 			getClientConfig();
-			ObjectOutputStream socketOut = null;
-			ObjectInputStream socketIn = null;
 			Socket acceptSocket = null;
 			try{
 				acceptSocket = setupClientSocket();
@@ -104,8 +105,6 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			askGridSize();
 			askTimePerTurn();
 		}
-		//askGridSize();
-		//askTimePerTurn();
 		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
@@ -135,7 +134,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		}
 		
 		setPreferredSize(new Dimension((BUTTON_SIZE_WIDTH*2+30)+((int)((colSize*100+100)*changeFactor)),(int)((rowSize*100+100)*changeFactor)));
-		stateMachine = new StateMachine(colSize, rowSize, timePerTurn, changeFactor);			
+		stateMachine = new StateMachine(colSize, rowSize, timePerTurn, changeFactor, networkSetting, socketOut, socketIn, clientStartingSide);			
 		
 		add(stateMachine.grid);
 		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((colSize*100+100)*changeFactor),(int)((rowSize*100+100)*changeFactor)); 
@@ -189,13 +188,13 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
             if(SwingUtilities.isRightMouseButton(evt)) {
                 String message = stateMachine.run("RClick", null);
                 messageBox.setText(message);
-            } else { //left click
-                String message = stateMachine.run("Click", evt.getPoint());
+            } else { //left click 
+            	String message = stateMachine.run("Click", evt.getPoint());
                 messageBox.setText(message);
             }
         }
         //start AI on transition to enemy turn
-        runAI();
+    	runAI();
     }//}}}
     
     private Boolean clickingIsAllowed() {//{{{
@@ -360,8 +359,11 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     			message = (String)m_socketIn.readObject();
     			System.out.println("Server: " + message);
     			String[] infoArray = message.split(" ");
+    			if(infoArray.length != 5)
+    				System.err.println("Bad info received from server.");
     			colSize = Integer.parseInt(infoArray[1]);
     			rowSize = Integer.parseInt(infoArray[2]);
+    			clientStartingSide = infoArray[3];
     			timePerTurn = Integer.parseInt(infoArray[4]);
     		}
     	} catch (Exception e) {}

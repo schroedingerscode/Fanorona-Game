@@ -79,7 +79,7 @@ public class Grid extends JPanel{
         }
     }//}}}
 
-    public void movePiece(Point a, Point b) {//{{{
+    public String movePiece(Point a, Point b) {//{{{
         //assumes you already checked that the move was valid
     	Piece p = getPieceAt(a);
         p.move(b);
@@ -88,6 +88,7 @@ public class Grid extends JPanel{
         Boolean captureDir = inferOrPromptCaptureDirection(a, b, aggressorTeam);
         killPieces(captureDir, a, b, !aggressorTeam);
         repaint();
+        return ((captureDir?"A":"W") + " " + a.x + " " + a.y + " " + b.x + " " + b.y + " + ");
     }//}}}
 
     private void killPieces(Boolean isFwdAtk, Point a, Point b, Boolean killColor) {//{{{

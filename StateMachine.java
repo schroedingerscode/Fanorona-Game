@@ -1,5 +1,9 @@
 import java.awt.Point;
 import java.util.*;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
 
 //Purpose: Takes ambiguous state-dependent user actions & decides what to do
 //TODO somebody: block state change during animation (real thread blocking)
@@ -11,6 +15,14 @@ public class StateMachine {
 
     double resizeFactor;
     
+    ObjectOutputStream out = null;
+    ObjectInputStream in = null;
+    
+    String networkSetting = "";
+    String moveString = "";
+    String clientStartingSide = "B";
+    Boolean endFlag = false;
+    
     //timer per turn
     Timer timer;
     int timePerMove;
@@ -21,7 +33,7 @@ public class StateMachine {
     Point prevDirection; //vector: Destination - Start
 
     //need to run() with a "NewGame" event before anything will happen
-    public StateMachine(int rowSize, int colSize, int speed, double changeFactor) {//{{{
+    public StateMachine(int rowSize, int colSize, int speed, double changeFactor, String m_networkSetting, ObjectOutputStream m_out, ObjectInputStream m_in, String m_clientStartingSide) {//{{{
         setState(State.GAME_OVER);
         timer = new Timer();
         timePerMove = speed;
@@ -32,6 +44,14 @@ public class StateMachine {
 		grid = new Grid(rowSize, colSize, changeFactor);  
 		//win = 0;
         movesRemaining = maxMoves();
+        
+        networkSetting = m_networkSetting;
+        out = m_out;
+        in = m_in;
+        clientStartingSide = m_clientStartingSide;
+        if(out != null) {
+        	try{out.flush();} catch (IOException e) {}
+        }
     }//}}}
 
     private int maxMoves() { return 10*numRows; }
@@ -49,7 +69,14 @@ public class StateMachine {
             setState(State.GAME_OVER);
         } else if (evtType == "NewGame") {
             newGame(p);
-            setState(State.PLAYER_SELECT);
+            if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
+            	setState(State.ENEMY_SELECT);
+            	handleRemoteInput();
+            //} else if(networkSetting.equals("Client") || networkSetting.equals("Server")) {
+	        //	setState(State.PLAYER_SELECT);
+	        } else {
+	        	setState(State.PLAYER_SELECT);
+	        }
         } else if(evtType == "Click") {
             handleClick(p);
         } else if(evtType == "RClick") {
@@ -79,6 +106,49 @@ public class StateMachine {
         s = newState;
     }//}}}
 
+    public void handleRemoteInput() {//{{{
+            String coords = "";
+            System.out.println("Waiting...");
+            try{coords = (String)in.readObject();} catch (Exception e) {}
+            System.out.println("ZZZZ: " + coords);
+            if(coords.contains("+")) {
+            	String[] coordsMajorArray = coords.split("\\+ ");
+            	for(int i = 0; i < coordsMajorArray.length; i++) {
+            		String[] coordsMinorArray = coordsMajorArray[i].split(" ");
+            		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+            		selectPiece(selectedPoint);
+            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+            		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
+                    	System.out.println("LARGE REMOTE MOVE");
+                        this.movePiece(movePoint);
+                        clearTempData();
+                        if(outOfMoves()) { 
+                            grid.loseMessage();
+                            this.run("GameOver", null);
+                            return;
+                        }
+                        movesRemaining--;
+                    } else { grid.illegalMove(); }
+            	}
+            } else {
+            	String[] coordsMinorArray = coords.split(" ");
+        		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+        		selectPiece(selectedPoint);
+        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+        		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
+                	System.out.println("REMOTE MOVE");
+                    this.movePiece(movePoint);
+                    clearTempData();
+                    if(outOfMoves()) { 
+                        grid.loseMessage();
+                        this.run("GameOver", null);
+                        return;
+                    }
+                    movesRemaining--;
+                } else { grid.illegalMove(); }
+            }
+    }//}}}
+    
     private void handleClick(Point globalPt) {//{{{
         //get clicked pt in grid coordinates
         Point pt = Grid.asGridCoor(globalPt, resizeFactor);
@@ -87,9 +157,11 @@ public class StateMachine {
         int id = grid.getState()[pt.x][pt.y];
 
         System.out.println("Clicked: " + pt.x + ", " + pt.y);
-        
+        //if(endFlag) handleRemoteInput();
+       
         switch(s) {
             case PLAYER_SELECT:
+            	endFlag = false;
                 if(id == 1) { 
                 	System.out.println("PLAYER_SELECT");
                     selectPiece(pt);
@@ -97,10 +169,11 @@ public class StateMachine {
                 } //else do nothing
                 break;
             case ENEMY_SELECT:
-                if(id == -1) { 
-                	System.out.println("ENEMY_SELECT");
-                    selectPiece(pt);
-                    setState(State.MOVE);
+            	endFlag = false;
+                if(id == -1) {
+	                System.out.println("ENEMY_SELECT");
+		            selectPiece(pt);
+		            setState(State.MOVE);
                 } //else do nothing
                 break;
             case MOVE:
@@ -125,7 +198,7 @@ public class StateMachine {
             //the other states do not respond to "Click" events
         }
     }//}}}
-
+    
     private void handleRClick() {//{{{
         switch(s) {
             case MOVE:
@@ -157,18 +230,40 @@ public class StateMachine {
     }//}}}
 
     private void endTurn() {//{{{
-        if(selectedPiece.isPlayer()) {
-            setState(State.ENEMY_SELECT);
-        } else {
-            setState(State.PLAYER_SELECT);
-        }
-        clearTempData();
+    	if(!(networkSetting.equals("Client") || networkSetting.equals("Server"))) {
+	    	if(selectedPiece.isPlayer()) {
+				setState(State.ENEMY_SELECT);
+			} else {
+				setState(State.PLAYER_SELECT);
+			}
+    	} else {
+    		if(selectedPiece.isPlayer()) {
+				setState(State.PLAYER_SELECT);
+			} else {
+				setState(State.ENEMY_SELECT);
+			}
+    	}
+    	grid.repaint();
+    	moveString = moveString.substring(0,moveString.length()-3);
+		try{
+			out.writeObject(moveString);
+			out.flush();
+		} catch (Exception e) {}
+		
+		clearTempData();
         if(outOfMoves()) { 
             grid.loseMessage();
             this.run("GameOver", null);
             return;
         }
         movesRemaining--;
+        
+        endFlag=true;
+        
+        try {
+			SwingUtilities.invokeLater(new Runnable() {public void run() {handleRemoteInput();}});
+		} catch (Exception e) {}
+        
     }//}}}
 
     private void handleChainedMove() {//{{{
@@ -185,6 +280,7 @@ public class StateMachine {
         selectedPiece = null;
         prevPositions = new ArrayList<Point>();
         prevDirection = null;
+        moveString = "";
     }//}}}
 
     private void selectPiece(Point pt) {//{{{
@@ -204,7 +300,7 @@ public class StateMachine {
         Point oldPt = selectedPiece.position();
         prevPositions.add(oldPt);
         prevDirection = getDirection(oldPt, pt);
-        grid.movePiece(selectedPiece.position(), pt);
+        moveString += grid.movePiece(selectedPiece.position(), pt);
         //propagate updated position to local copy
         selectedPiece = grid.getPieceAt(pt);
     }//}}}
