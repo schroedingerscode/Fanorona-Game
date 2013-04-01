@@ -97,11 +97,12 @@ public class Grid extends JPanel{
         }
     }//}}}
 
-    public void movePaika(Point a, Point b) {//{{{
+    public String movePaika(Point a, Point b) {//{{{
         //assumes you already checked that the move was valid
     	Piece p = getPieceAt(a);
         p.move(b);
         repaint();
+        return ("P " + a.x + " " + a.y + " " + b.x + " " + b.y + " + ");
     }//}}}
 
     public String movePiece(Point a, Point b) {//{{{

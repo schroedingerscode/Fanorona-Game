@@ -264,11 +264,11 @@ public class StateMachine {
 			}
     	}
     	grid.repaint();
-    	//moveString = moveString.substring(0,moveString.length()-3);
-		//try{
-		//	out.writeObject(moveString);
-		//	out.flush();
-		//} catch (Exception e) {}
+    	moveString = moveString.substring(0,moveString.length()-3);
+		try{
+			out.writeObject(moveString);
+			out.flush();
+		} catch (Exception e) {}
 		
 		clearTempData();
         if(outOfMoves()) { 
@@ -330,7 +330,8 @@ public class StateMachine {
         prevPositions.add(oldPt);
         prevDirection = getDirection(oldPt, pt);
         if(isPaika) {
-            grid.movePaika(selectedPiece.position(), pt);
+            moveString += grid.movePaika(selectedPiece.position(), pt);
+            
         } else {
             moveString += grid.movePiece(selectedPiece.position(), pt);
         }
