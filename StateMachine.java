@@ -76,7 +76,9 @@ public class StateMachine {
 	        	setState(State.PLAYER_SELECT);
 	        }
         } else if(evtType == "Click") {
-            handleClick(p);
+            handleClick(grid.asGridCoor(p), 0);
+        } else if(evtType == "AIChoice") {
+            handleClick(p, 1);
         } else if(evtType == "RClick") {
             handleRClick();
         }
@@ -119,7 +121,7 @@ public class StateMachine {
             		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
             		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
                     	System.out.println("LARGE REMOTE MOVE");
-                        this.movePiece(movePoint, false);
+                        this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
                         clearTempData();
                         if(outOfMoves()) { 
                             grid.loseMessage();
@@ -136,7 +138,7 @@ public class StateMachine {
         		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
         		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
                 	System.out.println("REMOTE MOVE");
-                    this.movePiece(movePoint, false);
+                    this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
                     clearTempData();
                     if(outOfMoves()) { 
                         grid.loseMessage();
@@ -149,9 +151,9 @@ public class StateMachine {
             }
     }//}}}
     
-    private void handleClick(Point globalPt) {//{{{
-        //get clicked pt in grid coordinates
-        Point pt = grid.asGridCoor(globalPt);
+    private void handleClick(Point pt, int dir) {//{{{
+        //input point should be in grid coordinates
+        //direction is -1 for back, 0 for undecided(player), 1 for forward
         if(!grid.isOnGrid(pt)) { return; }
         //figure out if it is a space:0, ally piece:1, or enemy:-1
         int id = grid.getState()[pt.x-1][pt.y-1];
@@ -181,10 +183,10 @@ public class StateMachine {
                     Point a = selectedPiece.position();
                     if (grid.isValidMove(a, pt)) {
                     	System.out.println("MOVE");
-                        this.movePiece(pt, false);
-                        handleChainedMove(); //sets next state
+                        this.movePiece(pt, false, dir);
+                        handleChainedMove(dir); //sets next state
                     } else if(grid.paikaAllowed(a)){
-                        this.movePiece(pt, true);
+                        this.movePiece(pt, true, dir);
                         endTurn();
                     } else { grid.illegalMove(); }
                 }  
@@ -202,8 +204,8 @@ public class StateMachine {
                     //selectedPiece has been updated since last move
                     if(grid.isValidDoubleMove(selectedPiece.position(), pt, prevPositions, prevDirection)) {
                     	System.out.println("MOVE AGAIN");
-                        this.movePiece(pt, false);
-                        handleChainedMove(); //sets next state
+                        this.movePiece(pt, false, dir);
+                        handleChainedMove(dir); //sets next state
                     } else { grid.illegalDoubleMove(); }
                 }
                 break;
@@ -288,9 +290,14 @@ public class StateMachine {
         
     }//}}}
 
-    private void handleChainedMove() {//{{{
+    private void handleChainedMove(int dir) {//{{{
+        //dir == 0 means is AI, don't prompt, but do call the AI again
         if(grid.canMoveAgain(selectedPiece.position(), prevPositions, prevDirection)) {
-            grid.multiTurnMessage();
+            if(dir != 0) {
+                AI.getDoubleMove(grid.getState(), grid.getDoubleMoves(selectedPiece.position(), prevPositions, prevDirection));
+            } else {
+                grid.multiTurnMessage();
+            }
             selectPiece(selectedPiece.position()); //to rehighlight
             setState(State.MOVE_AGAIN); 
         } else {
@@ -323,7 +330,8 @@ public class StateMachine {
         grid.repaint();
     }//}}}
 
-    private void movePiece(Point pt, Boolean isPaika) {//{{{
+    private void movePiece(Point pt, Boolean isPaika, int dir) {//{{{
+        //dir is only used by the AI so that a prompt doesn't come up
         deselectPiece();
 
         Point oldPt = selectedPiece.position();
@@ -332,7 +340,12 @@ public class StateMachine {
         if(isPaika) {
             grid.movePaika(selectedPiece.position(), pt);
         } else {
-            moveString += grid.movePiece(selectedPiece.position(), pt);
+            if(dir == 0) { //human, prompt
+                moveString += grid.movePiece(selectedPiece.position(), pt);
+            } else { //AI, no prompt
+                Boolean dirFlag = (dir == -1)?false:true;
+                moveString += grid.movePiece(selectedPiece.position(), pt, dirFlag);
+            }
         }
         //propagate updated position to local copy
         selectedPiece = grid.getPieceAt(pt);

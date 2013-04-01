@@ -43,7 +43,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     int colSize;
     Boolean aiIsOn;
 
-    AI ai;
+    public static AI ai;
 
 	public static void main(String[] args) throws Exception {//{{{
         //setup game window
@@ -217,7 +217,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
             //feed all the points to the state machine
             for(Point p : points) {
                 System.out.println("INSIDE OF FANORONA.JAVA " + p.x + " " + p.y);
-                String message = stateMachine.run("Click", p);
+                String message = stateMachine.run("AIChoice", p);
                 messageBox.setText(message);
             }
         }

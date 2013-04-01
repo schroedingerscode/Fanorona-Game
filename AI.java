@@ -421,4 +421,9 @@ public class AI {
     	
         return bestMove;
     }
+
+    static public Move getDoubleMove(int[][] gridState, List<Point> validEndPts) {
+        //only need the end point & the direction
+        return new Move(0,0,0,0);
+    }
 }

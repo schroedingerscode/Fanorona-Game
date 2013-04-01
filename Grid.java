@@ -84,17 +84,21 @@ public class Grid extends JPanel{
         repaint();
     }//}}}
 
-    private Boolean inferOrPromptCaptureDirection(Point a, Point b, Boolean team) {//{{{
+    private int inferCaptureDirection(Point a, Point b, Boolean team) {
         Boolean fwdWorks = canKillFwd(a, b, team);
         Boolean bkwdWorks = canKillBkwd(a, b, team);
-        if(fwdWorks && !bkwdWorks) { return true; }
-        else if(!fwdWorks && bkwdWorks) { return false; }
-        else { //ambiguous situation, prompt
-            int reply = JOptionPane.showConfirmDialog(this, "In which direction would you like to capture?\nPress \"Yes\" to capture forward.\nPress \"No\" to capture backwards.", "Capture Forward or Backward?", JOptionPane.YES_NO_OPTION);
-            if(reply == JOptionPane.YES_OPTION) {
-                return true;
-            } else { return false; }
-        }
+        if(fwdWorks && !bkwdWorks) { return 1; }
+        else if(!fwdWorks && bkwdWorks) { return -1; }
+        else { return 0; }//ambiguous situation
+    }
+    private Boolean inferOrPromptCaptureDirection(Point a, Point b, Boolean team) {//{{{
+        int captureDir = inferCaptureDirection(a, b, team);
+        if(captureDir == 1) { return true; }
+        else if(captureDir == -1) { return false; }
+        //else ambiguous situation, prompt
+        int reply = JOptionPane.showConfirmDialog(this, "In which direction would you like to capture?\nPress \"Yes\" to capture forward.\nPress \"No\" to capture backwards.", "Capture Forward or Backward?", JOptionPane.YES_NO_OPTION);
+        if(reply == JOptionPane.YES_OPTION) { return true;}
+        else { return false; }
     }//}}}
 
     public void movePaika(Point a, Point b) {//{{{
@@ -104,7 +108,25 @@ public class Grid extends JPanel{
         repaint();
     }//}}}
 
+    public String movePiece(Point a, Point b, Boolean specifiedDir) {//{{{
+        //AI version which does not prompt, infer overrides specified
+        //assumes you already checked that the move was valid
+    	Piece p = getPieceAt(a);
+        p.move(b);
+        Boolean aggressorTeam = p.isPlayer();
+
+        int inference = inferCaptureDirection(a, b, aggressorTeam);
+        Boolean captureDir = true; //inference == 1
+        if(inference == 0) { captureDir = specifiedDir; }
+        else if(inference == -1) { captureDir = false; }
+
+        killPieces(captureDir, a, b, !aggressorTeam);
+        repaint();
+        return ((captureDir?"A":"W") + " " + a.x + " " + a.y + " " + b.x + " " + b.y + " + ");
+    }//}}}
+
     public String movePiece(Point a, Point b) {//{{{
+        //player version which prompts
         //assumes you already checked that the move was valid
     	Piece p = getPieceAt(a);
         p.move(b);
@@ -368,6 +390,19 @@ public class Grid extends JPanel{
             }
         }
         return false;
+    }//}}}
+
+    public List<Point> getDoubleMoves(Point a, java.util.List<Point> prevPositions, Point prevDirection) {//{{{
+        List<Point> neighbours = getAdjacentPoints(a);
+        List<Point> endPts = new ArrayList<Point>();
+        for(Point p : neighbours) {
+            if(!hasPieceAt(p)) { //empty space
+                if(isValidDoubleMove(a, p, prevPositions, prevDirection)) { 
+                    endPts.add(p); 
+                }
+            }
+        }
+        return endPts;
     }//}}}
 
     private Boolean addPiece(Boolean isAlly, Point coor) {//{{{
