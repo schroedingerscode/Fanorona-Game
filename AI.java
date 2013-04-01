@@ -8,8 +8,8 @@ public class AI {
     private final int BLACKPIECE = -1;
     private final int WHITEPIECE = 1;
     private final int EMPTYSPOT = 0;
-	private int MAX_GRID_WIDTH_INDEX;
-	private int MAX_GRID_HEIGHT_INDEX;
+	public int MAX_GRID_WIDTH_INDEX;
+	public int MAX_GRID_HEIGHT_INDEX;
 	
     Boolean gameOver(int[][] gameState){
 
@@ -40,9 +40,9 @@ public class AI {
 	
 	public Boolean aiIsOnGrid(Point move) {
 		
-        if(move.x < 0 || move.x > MAX_GRID_WIDTH_INDEX) return false;
+        if(move.x < 1 || move.x > MAX_GRID_WIDTH_INDEX+1) return false;
         
-        if(move.y < 0 || move.y > MAX_GRID_HEIGHT_INDEX) return false; 
+        if(move.y < 1 || move.y > MAX_GRID_HEIGHT_INDEX+1) return false; 
         
         return true;
     }
@@ -65,7 +65,7 @@ public class AI {
 				
 				if(gameState[x][y] == BLACKPIECE){
 					
-					blackPawnLocations.add(new Point(x,y));
+					blackPawnLocations.add(new Point(x + 1,y + 1));
 					
 				}
 			}
@@ -94,7 +94,7 @@ public class AI {
 	    	//Case 1 ... x , y + 1
 	    	//If it's on the grid and the destination spot is empty...
 	    	if( aiIsOnGrid(new Point(startLocation.x, startLocation.y + 1)) 
-	    	&& (gameState[startLocation.x][startLocation.y+1] == EMPTYSPOT) ){
+	    	&& (gameState[startLocation.x-1][startLocation.y] == EMPTYSPOT) ){
 	    		
 	    		//We want to find if it has killable neighbors, so we need some points.
 	    		Point newLocation = new Point(startLocation.x, startLocation.y + 1);
@@ -104,13 +104,13 @@ public class AI {
     	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
     	        
     	        //This is the color of the piece making a move.
-    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
     	        
     	        //Make sure a forward move is on the grid.
     	        if(aiIsOnGrid(fwdTarPt)){
     	        	
     	        	//This is the piece that is in the destination spot, possibly empty.
-    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
     	        	
     	        	//Can kill in this direction, passed all valid move checks. 
     	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
@@ -120,7 +120,7 @@ public class AI {
     	        }	    		
     	        else if(aiIsOnGrid(bkwdTarPt)){
 	    			
-		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 		    		
 		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 		    			
@@ -130,7 +130,7 @@ public class AI {
 	    	}
 	    	//Case 2 ... x , y - 1
 	    	if( aiIsOnGrid(new Point(startLocation.x, startLocation.y - 1)) 
-	    	&& (gameState[startLocation.x][startLocation.y-1] == EMPTYSPOT) ){
+	    	&& (gameState[startLocation.x-1][startLocation.y-2] == EMPTYSPOT) ){
 	    		
 	    		Point newLocation = new Point(startLocation.x, startLocation.y - 1);
 	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
@@ -138,11 +138,11 @@ public class AI {
     	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
     	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
     	        
-    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
     	        
     	        if(aiIsOnGrid(fwdTarPt)){
     	        	
-    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
     	        	
     	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
 	    	        
@@ -152,7 +152,7 @@ public class AI {
 	    		
 	    		if(aiIsOnGrid(bkwdTarPt)){
 	    			
-		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 		    		
 		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 		    			
@@ -162,7 +162,7 @@ public class AI {
 	    	}
 	    	//Case 3 ... x + 1 , y
 	    	if( aiIsOnGrid(new Point(startLocation.x + 1, startLocation.y)) 
-	    	&& (gameState[startLocation.x + 1][startLocation.y] == EMPTYSPOT) ){
+	    	&& (gameState[startLocation.x][startLocation.y-1] == EMPTYSPOT) ){
 	    		
 	    		Point newLocation = new Point(startLocation.x + 1, startLocation.y);
 	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
@@ -170,11 +170,11 @@ public class AI {
     	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
     	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
     	        
-    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
     	        
     	        if(aiIsOnGrid(fwdTarPt)){
     	        	
-    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
     	        	
     	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
 	    	        
@@ -184,7 +184,7 @@ public class AI {
 	    		
 	    		if(aiIsOnGrid(bkwdTarPt)){
 	    			
-		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 		    		
 		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 		    			
@@ -194,7 +194,7 @@ public class AI {
 	    	}
 	    	//Case 4 ... x - 1 , y
 	    	if( aiIsOnGrid(new Point(startLocation.x - 1, startLocation.y)) 
-	    	&& (gameState[startLocation.x - 1][startLocation.y] == EMPTYSPOT) ){
+	    	&& (gameState[startLocation.x - 2][startLocation.y-1] == EMPTYSPOT) ){
 	    		
 	    		Point newLocation = new Point(startLocation.x - 1, startLocation.y);
 	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
@@ -202,11 +202,11 @@ public class AI {
     	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
     	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
     	        
-    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
     	        
     	        if(aiIsOnGrid(fwdTarPt)){
     	        	
-    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
     	        	
     	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
 	    	        
@@ -216,7 +216,7 @@ public class AI {
 	    		
 	    		if(aiIsOnGrid(bkwdTarPt)){
 	    			
-		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 		    		
 		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 		    			
@@ -229,7 +229,7 @@ public class AI {
 	    		
 	    		//Case 5 ... x + 1, y + 1
 	    		if( aiIsOnGrid(new Point(startLocation.x + 1, startLocation.y + 1)) 
-		    	&& (gameState[startLocation.x + 1][startLocation.y + 1] == EMPTYSPOT) ){
+		    	&& (gameState[startLocation.x][startLocation.y] == EMPTYSPOT) ){
 		    		
 		    		Point newLocation = new Point(startLocation.x + 1, startLocation.y + 1);
 		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
@@ -237,11 +237,11 @@ public class AI {
 	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
 	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
 	    	        
-	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
 	    	        
 	    	        if(aiIsOnGrid(fwdTarPt)){
 	    	        	
-	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
 	    	        	
 	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
 		    	        
@@ -251,7 +251,7 @@ public class AI {
 		    		
 		    		if(aiIsOnGrid(bkwdTarPt)){
 		    			
-			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 			    		
 			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 			    			
@@ -261,7 +261,7 @@ public class AI {
 		    	}  		
 	    		//Case 6 ... x + 1, y - 1
 	    		if( aiIsOnGrid(new Point(startLocation.x + 1, startLocation.y - 1)) 
-		    	&& (gameState[startLocation.x + 1][startLocation.y-1] == EMPTYSPOT) ){
+		    	&& (gameState[startLocation.x][startLocation.y-2] == EMPTYSPOT) ){
 		    		
 		    		Point newLocation = new Point(startLocation.x + 1, startLocation.y - 1);
 		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
@@ -269,11 +269,11 @@ public class AI {
 	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
 	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
 	    	        
-	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
 	    	        
 	    	        if(aiIsOnGrid(fwdTarPt)){
 	    	        	
-	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
 	    	        	
 	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
 		    	        
@@ -283,7 +283,7 @@ public class AI {
 		    		
 		    		if(aiIsOnGrid(bkwdTarPt)){
 		    			
-			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 			    		
 			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 			    			
@@ -293,7 +293,7 @@ public class AI {
 		    	}
 	    		//Case 7 ... x - 1, y + 1
 	    		if( aiIsOnGrid(new Point(startLocation.x - 1, startLocation.y + 1)) 
-		    	&& (gameState[startLocation.x - 1][startLocation.y+1] == EMPTYSPOT) ){
+		    	&& (gameState[startLocation.x - 2][startLocation.y] == EMPTYSPOT) ){
 		    		
 		    		Point newLocation = new Point(startLocation.x - 1, startLocation.y + 1);
 		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
@@ -301,11 +301,11 @@ public class AI {
 	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
 	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
 	    	        
-	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
 	    	        
 	    	        if(aiIsOnGrid(fwdTarPt)){
 	    	        	
-	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
 	    	        	
 	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
 		    	        
@@ -315,7 +315,7 @@ public class AI {
 		    		
 		    		if(aiIsOnGrid(bkwdTarPt)){
 		    			
-			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 			    		
 			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 			    			
@@ -325,7 +325,7 @@ public class AI {
 		    	}
 	    		//Case 8 ... x - 1, y - 1
 	    		if( aiIsOnGrid(new Point(startLocation.x - 1, startLocation.y - 1)) 
-		    	&& (gameState[startLocation.x - 1][startLocation.y - 1] == EMPTYSPOT) ){
+		    	&& (gameState[startLocation.x - 2][startLocation.y - 2] == EMPTYSPOT) ){
 		    		
 		    		Point newLocation = new Point(startLocation.x - 1, startLocation.y - 1);
 		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
@@ -333,11 +333,11 @@ public class AI {
 	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
 	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
 	    	        
-	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
 	    	        
 	    	        if(aiIsOnGrid(fwdTarPt)){
 	    	        	
-	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	fwdColor = gameState[fwdTarPt.x-1][fwdTarPt.y-1]; 
 	    	        	
 	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
 		    	        
@@ -347,7 +347,7 @@ public class AI {
 		    		
 		    		if(aiIsOnGrid(bkwdTarPt)){
 		    			
-			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		bkwdColor = gameState[bkwdTarPt.x-1][bkwdTarPt.y-1];
 			    		
 			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
 			    			
@@ -411,14 +411,6 @@ public class AI {
         return bestMove;
     }
 
-    private Move convertToNewCoorSystem(Move m, int numRows) {
-        Point a = Grid.convertToNewCoorSystem(m.getStartPoint(), numRows);
-        Point b = Grid.convertToNewCoorSystem(m.getEndPoint(), numRows);
-    	//System.out.println("Pt a" + a.x + " " + a.y); //TEMP DEBUG
-    	//System.out.println("Pt b" + b.x + " " + b.y); //TEMP DEBUG
-        return new Move(a.x, a.y, b.x, b.y);
-    }
-
     public Move getMove(int[][] gridState) {
         //returns a Move which is 2 pts: start & end
     	ArrayList<Move> allMoves = getValidMoves(gridState);
@@ -427,6 +419,6 @@ public class AI {
     	System.out.println("AI.JAVA " + bestMove.startPointX + " " + bestMove.startPointY);
     	System.out.println("AI.JAVA " + bestMove.endPointX + " " + bestMove.endPointY);
     	
-        return convertToNewCoorSystem(bestMove, MAX_GRID_HEIGHT_INDEX+1);
+        return bestMove;
     }
 }
