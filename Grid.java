@@ -327,17 +327,22 @@ public class Grid extends JPanel{
         return isOnGrid(b) && isAdjacent(a,b) && isUnique(b);
     }
 
-    //!!!WARNING untested
-    //public List<Point> getValidMoves(Point a) {//{{{
-    //    //returns a list of the valis pt B's when moving from pt A
-    //    List<Point> validMoves = getAdjacentPoints(a);
-    //    for(Point b : neighbours) {
-    //        if(!isValidMove(a, b)) { 
-    //            neighbours.remove(b);
-    //        }
-    //    }
-    //    return validMoves;
-    //}//}}}
+    public Boolean paikaAllowed(Point a) {
+        //allowed if no capture moves can be made
+        List<Point> l = getValidCaptureMoves(a);
+        return (l.size() <= 0)?true:false;
+    }
+
+    public List<Point> getValidCaptureMoves(Point a) {//{{{
+        //returns a list of the valid pt B's when moving from pt A
+        List<Point> neighbours = getAdjacentPoints(a);
+        for(Point b : neighbours) {
+            if(!isValidMove(a, b)) { 
+                neighbours.remove(b);
+            }
+        }
+        return neighbours;
+    }//}}}
 
     public Boolean isValidDoubleMove(Point a, Point b, java.util.List<Point> prevPositions, Point prevDirection) {//{{{
         //restrictions:

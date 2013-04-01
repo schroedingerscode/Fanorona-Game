@@ -178,11 +178,12 @@ public class StateMachine {
                 break;
             case MOVE:
                 if(id == 0) { //empty space
-                    if (grid.isValidMove(selectedPiece.position(), pt)) {
+                    Point a = selectedPiece.position();
+                    if (grid.isValidMove(a, pt)) {
                     	System.out.println("MOVE");
                         this.movePiece(pt, false);
                         handleChainedMove(); //sets next state
-                    } else if(grid.isValidPaikaMove(selectedPiece.position(), pt)) {
+                    } else if(grid.paikaAllowed(a)){
                         this.movePiece(pt, true);
                         endTurn();
                     } else { grid.illegalMove(); }
@@ -209,7 +210,7 @@ public class StateMachine {
             //the other states do not respond to "Click" events
         }
     }//}}}
-    
+
     private void handleRClick() {//{{{
         switch(s) {
             case MOVE:
