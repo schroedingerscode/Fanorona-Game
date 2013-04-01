@@ -140,6 +140,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((colSize*100+100)*changeFactor),(int)((rowSize*100+100)*changeFactor)); 
 
         ai = new AI();
+        ai.setBounds(colSize - 1 , rowSize - 1);
         aiIsOn = false;
 
         initButtons();
@@ -205,7 +206,15 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         //if at state of AI turn
         if(aiIsOn && (stateMachine.getState() == State.ENEMY_SELECT)) {
             //get the move from AI
-            ArrayList<Point> points = ai.getMove(stateMachine.grid.getState());
+            ArrayList<Point> points = new ArrayList<Point>();
+            Move move = ai.getMove(stateMachine.grid.getState());
+            Point startLocation = new Point(move.startPointX, move.startPointY);
+            Point endLocation = new Point(move.endPointX, move.endPointY);
+            points.add(startLocation);
+            points.add(endLocation);
+            
+            System.out.println("INSIDE OF FANORONA.JAVA " + move.startPointX + " " + move.startPointY);
+            System.out.println("INSIDE OF FANORONA.JAVA " + move.endPointX + " " + move.endPointY);
 
             //feed all the points to the state machine
             for(Point p : points) {
