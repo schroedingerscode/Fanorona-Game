@@ -1,53 +1,389 @@
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AI {
     AI() {}
+    
+    private final int BLACKPIECE = -1;
+    private final int WHITEPIECE = 1;
+    private final int EMPTYSPOT = 0;
+	private int MAX_GRID_WIDTH_INDEX;
+	private int MAX_GRID_HEIGHT_INDEX;
 	
-    static Boolean gameOver(int[][] gameState){
+    Boolean gameOver(int[][] gameState){
+
 	// Place holder, code written just have to meld things together
 	// during our next meeting
 	return false;
 	
     }
-
-	static int evaluateBoard(int[][] gameState){
+    
+    void setBounds(int rowSize, int columnSize){
+    	
+    	MAX_GRID_WIDTH_INDEX = rowSize;
+    	MAX_GRID_HEIGHT_INDEX = columnSize;
+    	
+    }
+    
+	int evaluateBoard(int[][] gameState){
 		int value = 0;
 		
-		for (int x = 0; x < 9; x++){ 
-			for (int y = 0; y < 5; y++){ 
+		for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
 				if(gameState[x][y] == 1) value++;
 				if(gameState[x][y] == -1) value--;
 			}
 		}
 		return value;
-	}
+	}	
 	
-
-    static ArrayList<int[][]> getValidMoves(int[][] gameState) {
-	//Place holder
-	return null;
+	public Boolean aiIsOnGrid(Point move) {
+		
+        if(move.x < 0 || move.x > MAX_GRID_WIDTH_INDEX) return false;
+        
+        if(move.y < 0 || move.y > MAX_GRID_HEIGHT_INDEX) return false; 
+        
+        return true;
     }
 	
-    static int[][] alphaBetaSearch(int[][] gameState){
+	private Boolean aiIsStrongPoint(Point a){
+		
+        return (a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0);
+    }
+
+    ArrayList<Move> getValidMoves(int[][] gameState) {
+    	
+    	
+    	//For our current board, we want to find all of the black pawns on the board.
+    	//Black pawns = ArrayList<Point> ... created from x y coordinates of board.
+    	ArrayList<Point> blackPawnLocations = new ArrayList<Point>();
+    	ArrayList<Move> validMoves = new ArrayList<Move>();
+    	
+    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
+				
+				if(gameState[x][y] == BLACKPIECE){
+					
+					blackPawnLocations.add(new Point(x,y));
+					
+				}
+			}
+		}        	
+    	
+    	//For each possible move, there are at least 4 adjacent squares (possibly 8).
+    	//For the possible squares, we make sure that the new move is several things.
+    	//1.) Does the piece moving have killable neighbors?
+    	//2.) Are the coordinates the piece is moving to actually on the board?
+    	//If it is these first two things, we need one final check.
+    	//3.) Is the spot being moved to empty?
+    	//If all these checks pass, we have found a valid move and add it to our valid move list.
+    	
+    	int movingColor = 0;
+    	int fwdColor = 0;
+    	int bkwdColor = 0;
+    	
+	    for (Point startLocation: blackPawnLocations){
+	    	
+	    	//We already know it's adjacent
+	    	//Check if it is on grid
+	    	//Check if it has killable neighbors
+	    	//Check if it's an empty spot
+	    	
+	    	
+	    	//Case 1 ... x , y + 1
+	    	//If it's on the grid and the destination spot is empty...
+	    	if( aiIsOnGrid(new Point(startLocation.x, startLocation.y + 1)) 
+	    	&& (gameState[startLocation.x][startLocation.y+1] == EMPTYSPOT) ){
+	    		
+	    		//We want to find if it has killable neighbors, so we need some points.
+	    		Point newLocation = new Point(startLocation.x, startLocation.y + 1);
+	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+    	        
+    	        //This is the color of the piece making a move.
+    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        
+    	        //Make sure a forward move is on the grid.
+    	        if(aiIsOnGrid(fwdTarPt)){
+    	        	
+    	        	//This is the piece that is in the destination spot, possibly empty.
+    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	
+    	        	//Can kill in this direction, passed all valid move checks. 
+    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+	    	        
+    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+    	        	}
+    	        }	    		
+    	        else if(aiIsOnGrid(bkwdTarPt)){
+	    			
+		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		
+		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+		    			
+		    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+		        	}
+	    		}
+	    	}
+	    	//Case 2 ... x , y - 1
+	    	if( aiIsOnGrid(new Point(startLocation.x, startLocation.y - 1)) 
+	    	&& (gameState[startLocation.x][startLocation.y-1] == EMPTYSPOT) ){
+	    		
+	    		Point newLocation = new Point(startLocation.x, startLocation.y - 1);
+	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+    	        
+    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        
+    	        if(aiIsOnGrid(fwdTarPt)){
+    	        	
+    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	
+    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+	    	        
+    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+    	        	}
+    	        }
+	    		
+	    		if(aiIsOnGrid(bkwdTarPt)){
+	    			
+		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		
+		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+		    			
+		    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+		        	}
+	    		}
+	    	}
+	    	//Case 3 ... x + 1 , y
+	    	if( aiIsOnGrid(new Point(startLocation.x + 1, startLocation.y)) 
+	    	&& (gameState[startLocation.x + 1][startLocation.y] == EMPTYSPOT) ){
+	    		
+	    		Point newLocation = new Point(startLocation.x + 1, startLocation.y);
+	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+    	        
+    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        
+    	        if(aiIsOnGrid(fwdTarPt)){
+    	        	
+    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	
+    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+	    	        
+    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+    	        	}
+    	        }
+	    		
+	    		if(aiIsOnGrid(bkwdTarPt)){
+	    			
+		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		
+		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+		    			
+		    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+		        	}
+	    		}
+	    	}
+	    	//Case 4 ... x - 1 , y
+	    	if( aiIsOnGrid(new Point(startLocation.x - 1, startLocation.y)) 
+	    	&& (gameState[startLocation.x - 1][startLocation.y] == EMPTYSPOT) ){
+	    		
+	    		Point newLocation = new Point(startLocation.x - 1, startLocation.y);
+	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+    	        
+    	        movingColor = gameState[startLocation.x][startLocation.y];
+    	        
+    	        if(aiIsOnGrid(fwdTarPt)){
+    	        	
+    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+    	        	
+    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+	    	        
+    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+    	        	}
+    	        }
+	    		
+	    		if(aiIsOnGrid(bkwdTarPt)){
+	    			
+		    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+		    		
+		    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+		    			
+		    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+		        	}
+	    		}
+	    	}
+	    	//Strong point cases
+	    	if( aiIsStrongPoint(startLocation) ){
+	    		
+	    		//Case 5 ... x + 1, y + 1
+	    		if( aiIsOnGrid(new Point(startLocation.x + 1, startLocation.y + 1)) 
+		    	&& (gameState[startLocation.x + 1][startLocation.y + 1] == EMPTYSPOT) ){
+		    		
+		    		Point newLocation = new Point(startLocation.x + 1, startLocation.y + 1);
+		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+	    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+	    	        
+	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        
+	    	        if(aiIsOnGrid(fwdTarPt)){
+	    	        	
+	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	
+	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+		    	        
+	    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+	    	        	}
+	    	        }
+		    		
+		    		if(aiIsOnGrid(bkwdTarPt)){
+		    			
+			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		
+			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+			    			
+			    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+			        	}
+		    		}
+		    	}  		
+	    		//Case 6 ... x + 1, y - 1
+	    		if( aiIsOnGrid(new Point(startLocation.x + 1, startLocation.y - 1)) 
+		    	&& (gameState[startLocation.x + 1][startLocation.y-1] == EMPTYSPOT) ){
+		    		
+		    		Point newLocation = new Point(startLocation.x + 1, startLocation.y - 1);
+		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+	    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+	    	        
+	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        
+	    	        if(aiIsOnGrid(fwdTarPt)){
+	    	        	
+	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	
+	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+		    	        
+	    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+	    	        	}
+	    	        }
+		    		
+		    		if(aiIsOnGrid(bkwdTarPt)){
+		    			
+			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		
+			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+			    			
+			    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+			        	}
+		    		}
+		    	}
+	    		//Case 7 ... x - 1, y + 1
+	    		if( aiIsOnGrid(new Point(startLocation.x - 1, startLocation.y + 1)) 
+		    	&& (gameState[startLocation.x - 1][startLocation.y+1] == EMPTYSPOT) ){
+		    		
+		    		Point newLocation = new Point(startLocation.x - 1, startLocation.y + 1);
+		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+	    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+	    	        
+	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        
+	    	        if(aiIsOnGrid(fwdTarPt)){
+	    	        	
+	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	
+	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+		    	        
+	    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+	    	        	}
+	    	        }
+		    		
+		    		if(aiIsOnGrid(bkwdTarPt)){
+		    			
+			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		
+			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+			    			
+			    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+			        	}
+		    		}
+		    	}
+	    		//Case 8 ... x - 1, y - 1
+	    		if( aiIsOnGrid(new Point(startLocation.x - 1, startLocation.y - 1)) 
+		    	&& (gameState[startLocation.x - 1][startLocation.y - 1] == EMPTYSPOT) ){
+		    		
+		    		Point newLocation = new Point(startLocation.x - 1, startLocation.y - 1);
+		    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
+	    	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
+	    	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
+	    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+	    	        
+	    	        movingColor = gameState[startLocation.x][startLocation.y];
+	    	        
+	    	        if(aiIsOnGrid(fwdTarPt)){
+	    	        	
+	    	        	fwdColor = gameState[fwdTarPt.x][fwdTarPt.y]; 
+	    	        	
+	    	        	if( (movingColor != fwdColor) && (fwdColor != EMPTYSPOT) ){	    			
+		    	        
+	    	        		validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+	    	        	}
+	    	        }
+		    		
+		    		if(aiIsOnGrid(bkwdTarPt)){
+		    			
+			    		bkwdColor = gameState[bkwdTarPt.x][bkwdTarPt.y];
+			    		
+			    		if( (movingColor != bkwdColor) && (bkwdColor != EMPTYSPOT) ){
+			    			
+			    			validMoves.add(new Move(startLocation.x, startLocation.y, newLocation.x, newLocation.y) );
+			        	}
+		    		}
+		    	}  		
+	    	}    		    	
+	    }    
+	    return validMoves;
+    
+    }
+	
+    int[][] alphaBetaSearch(int[][] gameState){
 
     	int bestMove = maxValue(gameState,5,-99999,99999);
 
-	return null;
+    	return null;
     } 
 
 
-    static int maxValue(int[][] gameState, int depth, int alpha, int beta){
+    int maxValue(int[][] gameState, int depth, int alpha, int beta){
 
 
         if ( gameOver(gameState) || depth <= 0) return evaluateBoard(gameState);
 		
         int bestMove = -99999;
-	ArrayList<int[][]> validMoves = getValidMoves(gameState);
+        int [][] previousBoard; 
+        ArrayList<Move> validMoves = getValidMoves(gameState);
 
-        for (int[][] move: validMoves){
-
-            bestMove = Math.max(bestMove,minValue(move, depth-1, alpha, beta));	        			
+        for (Move move: validMoves){
+        	
+        	
+        	gameState = move.makeMove(gameState);
+        	move.setValue( evaluateBoard(gameState) );
+            bestMove = Math.max(bestMove,minValue(gameState, depth-1, alpha, beta));	        			
             alpha = Math.max(alpha, bestMove);
             
             if (bestMove >= beta) return bestMove;
@@ -55,30 +391,37 @@ public class AI {
         return bestMove;
     }
 
-    static int minValue(int[][] gameState, int depth, int alpha, int beta){
+    int minValue(int[][] gameState, int depth, int alpha, int beta){
 
 
         if ( gameOver(gameState) || depth <= 0 ) return evaluateBoard(gameState);
 
         int bestMove = 99999;
-	ArrayList<int[][]> validMoves = getValidMoves(gameState);
+        ArrayList<Move> validMoves = getValidMoves(gameState);
 
-        for (int[][] move: validMoves){
-
-            bestMove = Math.min(bestMove, maxValue(move, depth-1, alpha, beta));
-	    beta = Math.min(beta, bestMove);
+        for (Move move: validMoves){
+        	
+        	gameState = move.makeMove(gameState);
+        	move.setValue( evaluateBoard(gameState) );
+            bestMove = Math.min(bestMove, maxValue(gameState, depth-1, alpha, beta));
+            beta = Math.min(beta, bestMove);
 	    
             if (bestMove <= alpha) return bestMove;
         }
         return bestMove;
     }
 
-    public ArrayList<Point> getMove(int[][] gridState) {
+    public Move getMove(int[][] gridState) {
         //returns a list of points (grid coor) specifying the move
         //1 - selected piece
         //2 - space to move to
         //3,4 - repeated move
         // repeat as necessary
-        return new ArrayList<Point>();
+    	ArrayList<Move> allMoves = getValidMoves(gridState);
+    	Move bestMove = allMoves.get(0);
+    	System.out.println("AI.JAVA " + bestMove.startPointX + " " + bestMove.startPointY);
+    	System.out.println("AI.JAVA " + bestMove.endPointX + " " + bestMove.endPointY);
+    	
+        return bestMove;
     }
 }
