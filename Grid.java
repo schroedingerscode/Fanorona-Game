@@ -121,6 +121,7 @@ public class Grid extends JPanel{
         if(isOnGrid(nextPt)) {
             if(!hasPieceAt(nextPt)) { return; } //done killing
             Piece victim = getPieceAt(nextPt);
+            if(victim.isSacrifice) { return; }
             if(victim.isPlayer() == killColor) { 
                 kill(victim); 
                 killNext(nextPt, dir, killColor);
@@ -131,13 +132,16 @@ public class Grid extends JPanel{
     private void kill(Piece p) { pieces.remove(p); }
 
     public int[][] getState() {//{{{
-        //WARNING - Now that pieces are no longer 0 indexed, you must subtract
+        //WARNING - In the new coordinate system (which is not 0-indexed) you must subtract from the piece's coordinates to get the index
         //  1 from x & y when accessing this array
         //returns a 2d array explaining the contents of each grid space
-        //to be used by the AI. 1 = player, 0 = empty, -1 = enemy
+        //to be used by the AI. 1 = player, 0 = empty, -1 = enemy, 2 = zombie
         int[][] state = new int[MAX_GRID_WIDTH_INDEX+1][MAX_GRID_HEIGHT_INDEX+1]; //x,y
         for(Piece p : pieces) {
-            if(p.isPlayer()) {
+            if(p.isSacrifice) {
+                state[p.position().x-1][p.position().y-1] = 2;
+            }
+            else if(p.isPlayer()) {
                 state[p.position().x-1][p.position().y-1] = 1;
             } else {
                 state[p.position().x-1][p.position().y-1] = -1;
@@ -275,7 +279,9 @@ public class Grid extends JPanel{
         Point fwd = Vector.subtract(b,a); //forward
         Point tarPt = Vector.add(b,fwd); //target point
         if(!isOnGrid(tarPt) || !hasPieceAt(tarPt)) { return false; }
-        if(getPieceAt(tarPt).isPlayer() != aggressorTeam) { return true; }
+        Piece victimToBe = getPieceAt(tarPt);
+        if(victimToBe.isSacrifice) { return false; }
+        if(victimToBe.isPlayer() != aggressorTeam) { return true; }
         return false;
     }//}}}
 
@@ -283,7 +289,9 @@ public class Grid extends JPanel{
         Point bkwd = Vector.subtract(a,b); //backward
         Point tarPt = Vector.add(a,bkwd); //target point
         if(!isOnGrid(tarPt) || !hasPieceAt(tarPt)) { return false; }
-        if(getPieceAt(tarPt).isPlayer() != aggressorTeam) { return true; }
+        Piece victimToBe = getPieceAt(tarPt);
+        if(victimToBe.isSacrifice) { return false; }
+        if(victimToBe.isPlayer() != aggressorTeam) { return true; }
         return false;
     }//}}}
 
@@ -383,6 +391,18 @@ public class Grid extends JPanel{
     	}
     }//}}}
 
+    public void killSacrifices(Boolean isNowPlayerTurn) {//{{{
+        for(Piece p : pieces) {
+            if(p.isSacrifice) {
+                if(p.isPlayer() && isNowPlayerTurn) {
+                    kill(p);
+                } else if(!p.isPlayer() && !isNowPlayerTurn) {
+                    kill(p);
+                }
+            }
+        }
+    }//}}}
+
     public void illegalMove() {
     	JOptionPane.showMessageDialog(this, "All moves must capture, move only one space, & remain on the board.", "Invalid move!", JOptionPane.PLAIN_MESSAGE);
     }    
@@ -393,6 +413,10 @@ public class Grid extends JPanel{
     
     public void multiTurnMessage() {
     	JOptionPane.showMessageDialog(this, "Move again or right-click to decline.", "It is still your turn", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public int confirmSacrificePrompt() {
+            return JOptionPane.showConfirmDialog(this, "Are you sure you want to sacrifice this piece?", "Confirm Sacrifice", JOptionPane.YES_NO_OPTION);
     }
     
     public void winMessage() {

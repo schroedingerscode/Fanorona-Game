@@ -91,9 +91,9 @@ public class StateMachine {
             case ENEMY_SELECT:
                 return turnMsg + "STATE: ENEMY_SELECT<br><br>Black, please select a piece</html>";
             case MOVE:
-                return turnMsg + "STATE: MOVE<br><br>Please move your selected piece</html>";
+                return turnMsg + "STATE: MOVE<br><br>Please move your selected piece or click on it again to sacrifice it.</html>";
             case MOVE_AGAIN:
-                return turnMsg + "STATE: MOVE_AGAIN<br><br>Please move the same piece again. Currently, the decline functionality has not been implemented.</html>";
+                return turnMsg + "STATE: MOVE_AGAIN<br><br>Please move the same piece again or right click to decline.</html>";
             case GAME_OVER:
                 return "STATE: GAME_OVER<br><br>To play again, please reset the board with the NEW_GAME button.</html>";
         }
@@ -167,6 +167,8 @@ public class StateMachine {
                 } //else do nothing
                 break;
             case ENEMY_SELECT:
+                grid.killSacrifices(false);
+                grid.repaint();
             	endFlag = false;
                 if(id == -1) {
 	                System.out.println("ENEMY_SELECT");
@@ -175,12 +177,20 @@ public class StateMachine {
                 } //else do nothing
                 break;
             case MOVE:
-                if(id == 0) {
+                if(id == 0) { //empty space
                     if (grid.isValidMove(selectedPiece.position(), pt)) {
                     	System.out.println("MOVE");
                         this.movePiece(pt);
                         handleChainedMove(); //sets next state
                     } else { grid.illegalMove(); }
+                }  
+                //same piece -> want to sacrifice it
+                else if(pt.equals(selectedPiece.position())) {
+                    int wasConfirmed = grid.confirmSacrificePrompt();
+                    if(wasConfirmed == 0) { //true
+                        sacrificePiece(pt);
+                        endTurn();
+                    } //else remain in move state
                 }
                 break;
             case MOVE_AGAIN:
@@ -230,23 +240,31 @@ public class StateMachine {
     private void endTurn() {//{{{
     	if(!(networkSetting.equals("Client") || networkSetting.equals("Server"))) {
 	    	if(selectedPiece.isPlayer()) {
+                grid.killSacrifices(false);
+                grid.repaint();
 				setState(State.ENEMY_SELECT);
 			} else {
+                grid.killSacrifices(true);
+                grid.repaint();
 				setState(State.PLAYER_SELECT);
 			}
     	} else {
     		if(selectedPiece.isPlayer()) {
+                grid.killSacrifices(true);
+                grid.repaint();
 				setState(State.PLAYER_SELECT);
 			} else {
+                grid.killSacrifices(false);
+                grid.repaint();
 				setState(State.ENEMY_SELECT);
 			}
     	}
     	grid.repaint();
-    	moveString = moveString.substring(0,moveString.length()-3);
-		try{
-			out.writeObject(moveString);
-			out.flush();
-		} catch (Exception e) {}
+    	//moveString = moveString.substring(0,moveString.length()-3);
+		//try{
+		//	out.writeObject(moveString);
+		//	out.flush();
+		//} catch (Exception e) {}
 		
 		clearTempData();
         if(outOfMoves()) { 
@@ -289,6 +307,13 @@ public class StateMachine {
 
     private void deselectPiece() {//{{{
         grid.getPieceAt(selectedPiece.position()).unhighlight();
+        grid.repaint();
+    }//}}}
+
+    private void sacrificePiece(Point pt) {//{{{
+        deselectPiece();
+        selectedPiece = grid.getPieceAt(pt);
+        selectedPiece.sacrifice();
         grid.repaint();
     }//}}}
 
