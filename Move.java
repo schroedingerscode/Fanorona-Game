@@ -9,6 +9,7 @@ public class Move{
 	public int startPointY;
 	public int endPointX;
 	public int endPointY;
+	public int valueOfMove;
 	
 	final int BLACKPIECE = -1;
 	final int WHITEPIECE = 1;
@@ -20,25 +21,30 @@ public class Move{
 		startPointX = startX;
 		startPointY = startY;
 		endPointX = endX;
-		endPointY = endY;		
+		endPointY = endY;
+		valueOfMove = 0;
 	}
 	
+	public void setValue(int value) { valueOfMove = value; } 
+	
+	//Return a point created from the starting coordinates of the move.
 	public Point getStartPoint() { return new Point(startPointX, startPointY); }
 	
+	//Return a point created from the ending coordinates of the move.
 	public Point getEndPoint() { return new Point(endPointX, endPointY); }
 	
-	//Makes a move based on the information currently stored in move.
+	//Makes a move based on the coordinates currently stored in move.
 	public int[][] makeMove(int[][] gameBoard) { 
 			
 		
-		//2 points, A and B
+		//2 points, A and B...
 		//Set A to getStartPoint()
-		//set B to getEndPoint()
-		//In our game state, we want to update the proper coordinates with the proper numbers
+		//Set B to getEndPoint()
+		//In our game state, we want to update the proper coordinates with the proper pieces, represented by numbers.
 		Point startPoint = this.getStartPoint();
 		Point endPoint = this.getEndPoint();
 		int colorToKill;
-		Boolean captureDir = true; //just always assume they will choose to capture forward given the option for now
+		Boolean captureDir = true; //For now, always assume capture forward when the choice is given.
 		
 		//White is moving, original spot now empty, new spot has white pawn
 		if(gameBoard[startPoint.x][startPoint.y] == WHITEPIECE){
@@ -61,11 +67,14 @@ public class Move{
       
         Point directionOfAttack = isFwdAtk?(Vector.subtract(endPoint,startPoint)):(Vector.subtract(startPoint,endPoint));
         Point nextStart = isFwdAtk?endPoint:startPoint;
-        return killNext(nextStart, directionOfAttack, colorToKill, gameBoard);
+        return aiKillNext(nextStart, directionOfAttack, colorToKill, gameBoard);
     }
-
-    private int[][] killNext(Point nextStart, Point directionOfAttack, int colorToKill, int[][] gameBoard) {
-        Point nextPt = Vector.add(nextStart,directionOfAttack);
+	
+	//Called by aiKillPieces and itself
+    private int[][] aiKillNext(Point nextStart, Point directionOfAttack, int colorToKill, int[][] gameBoard) {
+        
+    	Point nextPt = Vector.add(nextStart,directionOfAttack);
+    	
         if(nextPt.x <= gameBoard.length && nextPt.y <= gameBoard[0].length ) {
             
         	if(gameBoard[nextPt.x][nextPt.y] == EMPTYSPOT ) { return gameBoard; } //done killing
@@ -74,7 +83,7 @@ public class Move{
             
             if(victim == colorToKill) { 
             	gameBoard[nextPt.x][nextPt.x] = EMPTYSPOT;
-                return killNext(nextPt, directionOfAttack, colorToKill, gameBoard);
+                return aiKillNext(nextPt, directionOfAttack, colorToKill, gameBoard);
             }
         }
         return gameBoard;
