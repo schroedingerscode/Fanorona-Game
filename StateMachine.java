@@ -1,4 +1,6 @@
-import java.awt.Point;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 import java.util.*;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -23,8 +25,8 @@ public class StateMachine {
     Boolean endFlag = false;
     
     //timer per turn
-    Timer timer;
     int timePerMove;
+    
     
     //data valid only in certain states
     private Piece selectedPiece;
@@ -32,10 +34,8 @@ public class StateMachine {
     Point prevDirection; //vector: Destination - Start
 
     //need to run() with a "NewGame" event before anything will happen
-    public StateMachine(int rowSize, int colSize, int speed, double changeFactor, String m_networkSetting, ObjectOutputStream m_out, ObjectInputStream m_in, String m_clientStartingSide) {//{{{
+    public StateMachine(int rowSize, int colSize, int timeMove, double changeFactor, String m_networkSetting, ObjectOutputStream m_out, ObjectInputStream m_in, String m_clientStartingSide) {//{{{
         setState(State.GAME_OVER);
-        timer = new Timer();
-        timePerMove = speed;
         
         numCols = colSize;
         resizeFactor = changeFactor;
@@ -52,13 +52,16 @@ public class StateMachine {
         	try{out.flush();} catch (IOException e) {}
         }
     }//}}}
-
+    
     private int maxMoves() { return 10*numCols; }
 
     public State getState() { return s; }
     
     public Boolean outOfMoves() {//{{{ 
-        if(movesRemaining <= 0) return true;
+        if(movesRemaining <= 0) {
+        	grid.loseMessage();
+        	return true;
+        }
         return false;
     }//}}}
 
@@ -68,7 +71,6 @@ public class StateMachine {
             setState(State.GAME_OVER);
         } else if (evtType == "NewGame") {
             newGame(p);
-            try{out.flush();} catch (Exception e) {}
             if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
             	setState(State.ENEMY_SELECT);
             	handleRemoteInput();
@@ -77,13 +79,11 @@ public class StateMachine {
 	        } else {
 	        	setState(State.PLAYER_SELECT);
 	        }
-        } else if(evtType == "Click") {
-        	try{out.flush();} catch (Exception e) {}
+        } else if(evtType == "Click") {    	
             handleClick(grid.asGridCoor(p), 0);
         } else if(evtType == "AIChoice") {
             handleClick(p, 1);
         } else if(evtType == "RClick") {
-        	try{out.flush();} catch (Exception e) {}
             handleRClick();
         }
         return messageForCurrentState();
@@ -161,10 +161,9 @@ public class StateMachine {
         if(!grid.isOnGrid(pt)) { return; }
         //figure out if it is a space:0, ally piece:1, or enemy:-1
         int id = grid.getState()[pt.x-1][pt.y-1];
-        
         System.out.println("Clicked: " + pt.x + ", " + pt.y);
-        //if(endFlag) handleRemoteInput();
         
+        //if(endFlag) handleRemoteInput();
         switch(s) {
             case PLAYER_SELECT:
             	endFlag = false;
@@ -189,7 +188,7 @@ public class StateMachine {
                     	System.out.println("MOVE");
                         this.movePiece(pt, false, dir);
                         handleChainedMove(dir); //sets next state
-                    } else if(grid.paikaAllowed(a) && grid.isValidPaikaMove(a,pt)){
+                    } else if(grid.paikaAllowed(a)){
                         this.movePiece(pt, true, dir);
                         endTurn();
                     } else { grid.illegalMove(); }
@@ -333,7 +332,6 @@ public class StateMachine {
         deselectPiece();
         selectedPiece = grid.getPieceAt(pt);
         selectedPiece.sacrifice();
-        moveString += ("S" + pt.x + " " + pt.y);
         grid.repaint();
     }//}}}
 
@@ -404,6 +402,4 @@ public class StateMachine {
     	}    	
     	return p;
     }//}}}
-    
-    
 }
