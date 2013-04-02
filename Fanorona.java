@@ -167,11 +167,11 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         nameButton = new JButton("Change Name");
         timerBox = new JLabel("",JLabel.LEFT);
         timerBox.setVerticalAlignment(JLabel.TOP);
-        timerBox.setFont(new Font("Serif", Font.BOLD, 14));
+        timerBox.setFont(new Font("Serif", Font.BOLD, 12));
         timerBox.setForeground(Color.BLACK);
         messageBox = new JLabel("",JLabel.LEFT);
         messageBox.setVerticalAlignment(JLabel.TOP);
-        messageBox.setFont(new Font("Serif", Font.BOLD, 14));
+        messageBox.setFont(new Font("Serif", Font.BOLD, 12));
         messageBox.setForeground(Color.BLACK);
 
 		add(newGameButton);
@@ -186,8 +186,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		nameButton.setBounds(10, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		aiButton.setBounds(BUTTON_SIZE_WIDTH+20, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		
-		timerBox.setBounds(10, (BUTTON_SIZE_HEIGHT*2)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT);
-		messageBox.setBounds(10, (BUTTON_SIZE_HEIGHT*3)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
+		timerBox.setBounds(10, (BUTTON_SIZE_HEIGHT*2)+25, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT);
+		messageBox.setBounds(10, (BUTTON_SIZE_HEIGHT*3)+25, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
     }//}}}
 
     public void mouseEntered(MouseEvent evt) {}
