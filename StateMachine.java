@@ -98,7 +98,7 @@ public class StateMachine {
             case MOVE_AGAIN:
                 return turnMsg + "STATE: MOVE_AGAIN<br><br>Please move the same piece again or right click to decline.</html>";
             case GAME_OVER:
-                return "STATE: GAME_OVER<br><br>To play again, please reset the board with the NEW_GAME button.</html>";
+                return "<html>STATE: GAME_OVER<br><br>To play again, please reset the board with the NEW_GAME button.</html>";
         }
         return "ERROR: Reached invalid state";
     }//}}}
@@ -212,7 +212,8 @@ public class StateMachine {
                 break;
             //the other states do not respond to "Click" events
         }
-        grid.checkWinningState();
+        if(grid.checkWinningState())
+        	setState(State.GAME_OVER);
     }//}}}
 
     private void handleRClick() {//{{{
