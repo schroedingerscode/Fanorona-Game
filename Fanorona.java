@@ -17,8 +17,9 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JButton instructionsButton; 
 	private JButton nameButton;
 	private JButton aiButton;
-	private JLabel messageBox;  
 	private JLabel timerBox;
+	private JLabel messageBox;  
+	
 
 	static final int LOOP_CONTINUOUSLY = 9999;
 	int BUTTON_SIZE_WIDTH = 120;
@@ -105,7 +106,32 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			askGridSize();
 			askTimePerTurn();
 		}
+		createGrid();
 		
+		setPreferredSize(new Dimension((BUTTON_SIZE_WIDTH*2+30)+((int)((colSize*100+100)*changeFactor)),(int)((rowSize*100+100)*changeFactor)));
+		stateMachine = new StateMachine(colSize, rowSize, timePerTurn, changeFactor, networkSetting, socketOut, socketIn, clientStartingSide);			
+		
+		add(stateMachine.grid);
+		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((colSize*100+100)*changeFactor),(int)((rowSize*100+100)*changeFactor)); 
+		
+        ai = new AI();
+        ai.setBounds(colSize - 1 , rowSize - 1);
+        aiIsOn = false;
+
+        initButtons();
+
+        //add listeners
+        instructionsButton.addActionListener(this);
+        newGameButton.addActionListener(this);
+        nameButton.addActionListener(this);
+        aiButton.addActionListener(this);
+        addMouseListener(this);
+
+        String message = stateMachine.run("NewGame", null);
+        messageBox.setText(message);
+	} //}}}
+
+	public void createGrid() {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
 		//resize the grid
@@ -131,53 +157,37 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 				changeFactor = yGridSize / yGridAndExcess;
 				System.out.println("% change: " + (yGridSize / yGridAndExcess));
 			}				
-		}
-		
-		setPreferredSize(new Dimension((BUTTON_SIZE_WIDTH*2+30)+((int)((colSize*100+100)*changeFactor)),(int)((rowSize*100+100)*changeFactor)));
-		stateMachine = new StateMachine(colSize, rowSize, timePerTurn, changeFactor, networkSetting, socketOut, socketIn, clientStartingSide);			
-		
-		add(stateMachine.grid);
-		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((colSize*100+100)*changeFactor),(int)((rowSize*100+100)*changeFactor)); 
-
-        ai = new AI();
-        ai.setBounds(colSize - 1 , rowSize - 1);
-        aiIsOn = false;
-
-        initButtons();
-
-        //add listeners
-        instructionsButton.addActionListener(this);
-        newGameButton.addActionListener(this);
-        nameButton.addActionListener(this);
-        aiButton.addActionListener(this);
-        addMouseListener(this);
-
-        String message = stateMachine.run("NewGame", null);
-        messageBox.setText(message);
-	} //}}}
-
+		}		
+	}
+	
     public void initButtons() {//{{{
         instructionsButton = new JButton("Instructions");
         newGameButton = new JButton("New Game");
         aiButton = new JButton("Toggle AI");
         nameButton = new JButton("Change Name");
+        timerBox = new JLabel("",JLabel.LEFT);
+        timerBox.setVerticalAlignment(JLabel.TOP);
+        timerBox.setFont(new Font("Serif", Font.BOLD, 14));
+        timerBox.setForeground(Color.BLACK);
         messageBox = new JLabel("",JLabel.LEFT);
         messageBox.setVerticalAlignment(JLabel.TOP);
-        messageBox.setFont(new  Font("Serif", Font.BOLD, 14));
+        messageBox.setFont(new Font("Serif", Font.BOLD, 14));
         messageBox.setForeground(Color.BLACK);
 
 		add(newGameButton);
         add(aiButton);
 		add(instructionsButton);	
 		add(nameButton);
+		add(timerBox);
 		add(messageBox);
-		
+				
 		newGameButton.setBounds(10, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		instructionsButton.setBounds(BUTTON_SIZE_WIDTH+20, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		nameButton.setBounds(10, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		aiButton.setBounds(BUTTON_SIZE_WIDTH+20, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		
-		messageBox.setBounds(10, (BUTTON_SIZE_HEIGHT*2)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
+		timerBox.setBounds(10, (BUTTON_SIZE_HEIGHT*2)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT);
+		messageBox.setBounds(10, (BUTTON_SIZE_HEIGHT*3)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
     }//}}}
 
     public void mouseEntered(MouseEvent evt) {}
