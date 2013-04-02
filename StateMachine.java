@@ -10,7 +10,7 @@ public class StateMachine {
     public Grid grid;
     private State s;
     public int movesRemaining;
-    private int numRows = 5;
+    private int numCols;
 
     double resizeFactor;
     
@@ -37,6 +37,7 @@ public class StateMachine {
         timer = new Timer();
         timePerMove = speed;
         
+        numCols = colSize;
         resizeFactor = changeFactor;
         
         //selectedPiece is not valid until MOVE states
@@ -52,7 +53,7 @@ public class StateMachine {
         }
     }//}}}
 
-    private int maxMoves() { return 10*numRows; }
+    private int maxMoves() { return 10*numCols; }
 
     public State getState() { return s; }
     
@@ -66,7 +67,6 @@ public class StateMachine {
         if(evtType == "GameOver") {
             setState(State.GAME_OVER);
         } else if (evtType == "NewGame") {
-        	try{out.flush();} catch (Exception e) {}
             newGame(p);
             if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
             	setState(State.ENEMY_SELECT);
@@ -77,19 +77,17 @@ public class StateMachine {
 	        	setState(State.PLAYER_SELECT);
 	        }
         } else if(evtType == "Click") {
-        	try{out.flush();} catch (Exception e) {}
             handleClick(grid.asGridCoor(p), 0);
         } else if(evtType == "AIChoice") {
             handleClick(p, 1);
         } else if(evtType == "RClick") {
-        	try{out.flush();} catch (Exception e) {}
             handleRClick();
         }
         return messageForCurrentState();
     }//}}}
 
     private String messageForCurrentState() {//{{{
-        String turnMsg = "<html>Turn #" + (maxMoves() - movesRemaining) + " <br>";
+        String turnMsg = "<html>Turn #" + (maxMoves() - movesRemaining) + " (out of " + maxMoves() + "):<br>";
         switch(s) {
             case PLAYER_SELECT:
                 return turnMsg + "STATE: PLAYER_SELECT<br><br>White, please select a piece</html>";
@@ -160,10 +158,10 @@ public class StateMachine {
         if(!grid.isOnGrid(pt)) { return; }
         //figure out if it is a space:0, ally piece:1, or enemy:-1
         int id = grid.getState()[pt.x-1][pt.y-1];
-
+        
         System.out.println("Clicked: " + pt.x + ", " + pt.y);
         //if(endFlag) handleRemoteInput();
-       
+        
         switch(s) {
             case PLAYER_SELECT:
             	endFlag = false;
@@ -184,13 +182,11 @@ public class StateMachine {
             case MOVE:
                 if(id == 0) { //empty space
                     Point a = selectedPiece.position();
-                    //System.out.println("PAIKA?: " + grid.paikaAllowed(a));
                     if (grid.isValidMove(a, pt)) {
                     	System.out.println("MOVE");
                         this.movePiece(pt, false, dir);
                         handleChainedMove(dir); //sets next state
-                    } else if(grid.paikaAllowed(a) && grid.isValidPaikaMove(a,pt)){
-                    	System.out.println("PAIKA!!!");
+                    } else if(grid.paikaAllowed(a)){
                         this.movePiece(pt, true, dir);
                         endTurn();
                     } else { grid.illegalMove(); }
@@ -216,6 +212,7 @@ public class StateMachine {
                 break;
             //the other states do not respond to "Click" events
         }
+        grid.checkWinningState();
     }//}}}
 
     private void handleRClick() {//{{{
@@ -332,7 +329,6 @@ public class StateMachine {
         deselectPiece();
         selectedPiece = grid.getPieceAt(pt);
         selectedPiece.sacrifice();
-        moveString += ("S" + pt.x + " " + pt.y);
         grid.repaint();
     }//}}}
 
