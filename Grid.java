@@ -12,10 +12,10 @@ import java.util.List;
 public class Grid extends JPanel{
     private List<Piece> pieces;
     
-    private int MIN_GRID_WIDTH_INDEX = 0;
-    private int MAX_GRID_WIDTH_INDEX; // 0 <= width <= 13 (must be odd)
-    private int MIN_GRID_HEIGHT_INDEX = 0;
-    private int MAX_GRID_HEIGHT_INDEX; // 0 <= height <= 13 (must be odd)
+    static private int MIN_GRID_WIDTH_INDEX = 0;
+    static private int MAX_GRID_WIDTH_INDEX; // 0 <= width <= 13 (must be odd)
+    static private int MIN_GRID_HEIGHT_INDEX = 0;
+    static  private int MAX_GRID_HEIGHT_INDEX; // 0 <= height <= 13 (must be odd)
     public int SQ_W = 100; //Square width including resizeFactor
     public int SQ_H = 100; //Square height including resizeFactor
     private int MAXW = (MAX_GRID_WIDTH_INDEX) * SQ_W;
@@ -270,7 +270,7 @@ public class Grid extends JPanel{
         return true;
     }//}}}
 
-    public Boolean isOnGrid(Point coor) {//{{{
+   static public Boolean isOnGrid(Point coor) {//{{{
         //Req: is on grid
         //     is unique
         if(coor.x < MIN_GRID_WIDTH_INDEX+1 || coor.x > MAX_GRID_WIDTH_INDEX+1) {
