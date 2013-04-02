@@ -1,7 +1,10 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
 import java.util.*;
+import java.util.Timer;
+
 import javax.sound.midi.*;
 import javax.swing.JOptionPane;
 
@@ -18,8 +21,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	private JButton nameButton;
 	private JButton aiButton;
 	private JLabel timerBox;
-	private JLabel messageBox;  
-	
+	private JLabel messageBox;  	
 
 	static final int LOOP_CONTINUOUSLY = 9999;
 	int BUTTON_SIZE_WIDTH = 120;
@@ -33,6 +35,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	
 	String playerName;
 	int timePerTurn;
+	Clock clock;
 	
 	String networkSetting;
 	String serverName;
@@ -129,6 +132,14 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
         String message = stateMachine.run("NewGame", null);
         messageBox.setText(message);
+        
+        clock = new Clock(timePerTurn);
+        EventQueue.invokeLater(new Runnable() {
+        	@Override
+            public void run() {
+                clock.startTimer();
+            }
+        });
 	} //}}}
 
 	public void createGrid() {
@@ -199,6 +210,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
                 messageBox.setText(message);
             } else { //left click 
             	String message = stateMachine.run("Click", evt.getPoint());
+            	
                 messageBox.setText(message);
             }
         }
@@ -234,7 +246,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     }//}}}
 
     public void actionPerformed(ActionEvent evt) {//{{{
-        Object src = evt.getSource();
+        Object src = evt.getSource();        
+        
         if(src == newGameButton) {
             String message = stateMachine.run("NewGame", null);
             messageBox.setText(message);
@@ -453,4 +466,41 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
                 "* The game ends when one player captures all stones of the opponent. If neither player can achieve this, the game is a draw.\n";
         JOptionPane.showMessageDialog(this, instructionDialog, "Fanorona Instructions", JOptionPane.PLAIN_MESSAGE);
     }//}}}
+    
+    public class Clock {
+        private Timer timer = new Timer();
+        private int timeRemaining;
+        private boolean timerOff;
+
+        public Clock(int time) {
+        	timeRemaining = time;
+        	if(time <= 0)
+        		timerOff = true;
+        	else
+        		timerOff = false;
+        }
+
+        private class UpdateUITask extends TimerTask {
+            @Override
+            public void run() {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                    	if(timeRemaining <= 0) {
+                    		System.out.println("LOSER");
+                    		timer.cancel();
+                    	}
+                        timerBox.setText("Time left for turn (seconds): " + String.valueOf(timeRemaining--));
+                    }
+                });
+            }
+        }
+        
+        public void startTimer() {
+        	if(timerOff)
+        		timerBox.setText("Time left for turn (seconds): OFF");
+        	else
+        		timer.schedule(new UpdateUITask(), timeRemaining, 1000);
+        }
+    }
 }
