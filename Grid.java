@@ -447,14 +447,22 @@ public class Grid extends JPanel{
     }//}}}
 
     public void killSacrifices(Boolean isNowPlayerTurn) {//{{{
-        for(Piece p : pieces) {
+        //have to loop twice to avoid concurrency errors
+        //(can't delete from pieces while iterating through it)
+        List<Integer> toKillList = new ArrayList<Integer>();
+        for(int i = pieces.size() - 1; i > 0; i--) {
+            Piece p = pieces.get(i);
             if(p.isSacrifice) {
                 if(p.isPlayer() && isNowPlayerTurn) {
-                    kill(p);
+                    toKillList.add(i);     
                 } else if(!p.isPlayer() && !isNowPlayerTurn) {
-                    kill(p);
+                    toKillList.add(i);     
                 }
             }
+        }
+        //the indices are going from largest to smallest just in case
+        for(int i : toKillList) {
+            pieces.remove(i);
         }
     }//}}}
 
