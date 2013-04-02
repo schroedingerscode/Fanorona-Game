@@ -122,42 +122,78 @@ public class StateMachine {
             try{coords = (String)in.readObject();} catch (Exception e) {}
             System.out.println("ZZZZ: " + coords);
             if(!coords.isEmpty()){
-            if(coords.contains("+")) {
-            	String[] coordsMajorArray = coords.split("\\+ ");
-            	for(int i = 0; i < coordsMajorArray.length; i++) {
-            		String[] coordsMinorArray = coordsMajorArray[i].split(" ");
-            		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
-            		selectPiece(selectedPoint);
-            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
-            		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
-                    	System.out.println("LARGE REMOTE MOVE");
-                        this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
-                        clearTempData();
-                        if(outOfMoves()) { 
-                            grid.loseMessage();
-                            this.run("GameOver", null);
-                            return;
-                        }
-                        movesRemaining--;
-                    } else { grid.illegalMove(); }
-            	}
-            } else {
-            	String[] coordsMinorArray = coords.split(" ");
-        		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
-        		selectPiece(selectedPoint);
-        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
-        		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
-                	System.out.println("REMOTE MOVE");
-                    this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
-                    clearTempData();
-                    if(outOfMoves()) { 
-                        grid.loseMessage();
-                        this.run("GameOver", null);
-                        return;
-                    }
-                    movesRemaining--;
-                } else { grid.illegalMove(); }
-            }
+	            if(coords.contains("+")) {
+	            	String[] coordsMajorArray = coords.split("\\+ ");
+	            	for(int i = 0; i < coordsMajorArray.length; i++) {
+	            		String[] coordsMinorArray = coordsMajorArray[i].split(" ");
+	            		if(coordsMinorArray[0].equals("W") || coordsMinorArray[0].equals("A")) {
+		            		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+		            		selectPiece(selectedPoint);
+		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+		            		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
+		                    	System.out.println("LARGE REMOTE MOVE");
+		                        this.movePiece(movePoint, false, 0); //TEMP NAM assuming fwd
+		                        clearTempData();
+		                        if(outOfMoves()) { 
+		                            grid.loseMessage();
+		                            this.run("GameOver", null);
+		                            return;
+		                        }
+		                        movesRemaining--;
+		                    } else { grid.illegalMove(); }
+	            		} else if (coordsMinorArray[0].equals("P")) {
+	            			Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+		            		selectPiece(selectedPoint);
+		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+		            		if(grid.paikaAllowed(selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
+		                    	System.out.println("LARGE REMOTE MOVE");
+		                        this.movePiece(movePoint, true, 0); //TEMP NAM assuming fwd
+		                        clearTempData();
+		                        if(outOfMoves()) { 
+		                            grid.loseMessage();
+		                            this.run("GameOver", null);
+		                            return;
+		                        }
+		                        movesRemaining--;
+		                    } else { 
+		                    	 grid.illegalMove();
+		                    }
+	            		}
+	            	}
+	            } else {
+	            	String[] coordsMinorArray = coords.split(" ");
+	            	if(coordsMinorArray[0].equals("W") || coordsMinorArray[0].equals("A")) {
+		        		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+		        		selectPiece(selectedPoint);
+		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+		        		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
+		                	System.out.println("REMOTE MOVE");
+		                    this.movePiece(movePoint, false, 0); //TEMP NAM assuming fwd
+		                    clearTempData();
+		                    if(outOfMoves()) { 
+		                        grid.loseMessage();
+		                        this.run("GameOver", null);
+		                        return;
+		                    }
+		                    movesRemaining--;
+		                } else { grid.illegalMove(); }
+	            	} else if (coordsMinorArray[0].equals("P")) {
+	            		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+		        		selectPiece(selectedPoint);
+		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+		        		if(grid.paikaAllowed(selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
+		                	System.out.println("REMOTE MOVE");
+		                    this.movePiece(movePoint, true, 0); //TEMP NAM assuming fwd
+		                    clearTempData();
+		                    if(outOfMoves()) { 
+		                        grid.loseMessage();
+		                        this.run("GameOver", null);
+		                        return;
+		                    }
+		                    movesRemaining--;
+		                } else { grid.illegalMove(); }
+	            	}
+	            }
             }
     }//}}}
     
