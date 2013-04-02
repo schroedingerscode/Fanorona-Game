@@ -66,6 +66,7 @@ public class StateMachine {
         if(evtType == "GameOver") {
             setState(State.GAME_OVER);
         } else if (evtType == "NewGame") {
+        	try{out.flush();} catch (Exception e) {}
             newGame(p);
             if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
             	setState(State.ENEMY_SELECT);
@@ -76,10 +77,12 @@ public class StateMachine {
 	        	setState(State.PLAYER_SELECT);
 	        }
         } else if(evtType == "Click") {
+        	try{out.flush();} catch (Exception e) {}
             handleClick(grid.asGridCoor(p), 0);
         } else if(evtType == "AIChoice") {
             handleClick(p, 1);
         } else if(evtType == "RClick") {
+        	try{out.flush();} catch (Exception e) {}
             handleRClick();
         }
         return messageForCurrentState();
