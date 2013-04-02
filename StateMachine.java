@@ -332,6 +332,7 @@ public class StateMachine {
         deselectPiece();
         selectedPiece = grid.getPieceAt(pt);
         selectedPiece.sacrifice();
+        moveString += ("S" + pt.x + " " + pt.y);
         grid.repaint();
     }//}}}
 
