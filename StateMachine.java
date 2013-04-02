@@ -26,7 +26,7 @@ public class StateMachine {
     
     //timer per turn
     int timePerMove;
-    
+    Clock clock;
     
     //data valid only in certain states
     private Piece selectedPiece;
@@ -36,6 +36,8 @@ public class StateMachine {
     //need to run() with a "NewGame" event before anything will happen
     public StateMachine(int rowSize, int colSize, int timeMove, double changeFactor, String m_networkSetting, ObjectOutputStream m_out, ObjectInputStream m_in, String m_clientStartingSide) {//{{{
         setState(State.GAME_OVER);
+        timePerMove = timeMove;
+        clock = new Clock(timePerMove);
         
         numCols = colSize;
         resizeFactor = changeFactor;
@@ -71,6 +73,7 @@ public class StateMachine {
             setState(State.GAME_OVER);
         } else if (evtType == "NewGame") {
             newGame(p);
+            clock.restartTimer();
             if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
             	setState(State.ENEMY_SELECT);
             	handleRemoteInput();
@@ -214,7 +217,7 @@ public class StateMachine {
                 break;
             //the other states do not respond to "Click" events
         }
-        if(grid.checkWinningState())
+        if(grid.checkWinningState() || clock.gameOver())
         	setState(State.GAME_OVER);
     }//}}}
 
@@ -270,6 +273,7 @@ public class StateMachine {
 				setState(State.ENEMY_SELECT);
 			}
     	}
+    	clock.restartTimer();
     	grid.repaint();
     	moveString = moveString.substring(0,moveString.length()-3);
 		try{
