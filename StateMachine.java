@@ -77,7 +77,7 @@ public class StateMachine {
             clock.restartTimer();
             if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
             	setState(State.ENEMY_SELECT);
-            	handleRemoteInput();
+            	handleRemoteInput(false);
             //} else if(networkSetting.equals("Client") || networkSetting.equals("Server")) {
 	        //	setState(State.PLAYER_SELECT);
 	        } else {
@@ -116,12 +116,21 @@ public class StateMachine {
         s = newState;
     }//}}}
 
-    public void handleRemoteInput() {//{{{
+    public void handleRemoteInput(Boolean waitForOKFlag) {//{{{
+    	if(waitForOKFlag) {
+	    	String okAck = "";
+	        try{okAck = (String)in.readObject();} catch (Exception e) {}
+    	}
             String coords = "";
             System.out.println("Waiting...");
             try{coords = (String)in.readObject();} catch (Exception e) {}
             System.out.println("ZZZZ: " + coords);
             if(!coords.isEmpty()){
+            	try {
+            		String ok = "OK";
+                	out.writeObject(ok);
+                	out.flush();
+            	} catch (Exception e) {}
 	            if(coords.contains("+")) {
 	            	String[] coordsMajorArray = coords.split("\\+ ");
 	            	for(int i = 0; i < coordsMajorArray.length; i++) {
@@ -332,7 +341,7 @@ public class StateMachine {
         
         if(networkSetting.equals("Server") || networkSetting.equals("Client")){
 	        try {
-				SwingUtilities.invokeLater(new Runnable() {public void run() {handleRemoteInput();}});
+				SwingUtilities.invokeLater(new Runnable() {public void run() {handleRemoteInput(true);}});
 			} catch (Exception e) {}
         }
         
