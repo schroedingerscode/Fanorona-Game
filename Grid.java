@@ -180,16 +180,26 @@ public class Grid extends JPanel{
         //all other spaces were initialized to 0
         return state;
     }//}}}
-
-    //TODO finish
-	Boolean winningState(){//{{{
-		//Also need to add a turns at 0 condition
-		//Can add later - currently part of stateMachine.
-		//if(playerPieces.isEmpty() || enemyPieces.isEmpty()){
-
-		//	return true;
-		//}
-		return false;		
+	
+	boolean checkWinningState(){//{{{
+		int white = 0;
+		int black = 0;
+		for(Piece p : pieces) {
+			if(p.color)
+				white++;
+			else
+				black++;
+		}
+		if(white <= 0) {
+			loseMessage();
+			return true;
+		}
+		else if(black <= 0) {
+			winMessage();
+			return true;
+		}
+		else
+			return false;	
 	}//}}}
 	
     public Piece getPieceAt(Point pt) {//{{{
@@ -272,7 +282,7 @@ public class Grid extends JPanel{
         return true;
     }//}}}
     
-    static private Boolean isStrongPoint(Point a) {//{{{
+    private Boolean isStrongPoint(Point a) {//{{{
         //(odd,odd) or (even,even)
         return (a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0);
     }//}}}
@@ -281,7 +291,7 @@ public class Grid extends JPanel{
     //Points where x and y are not both odd or even results in only 4 adjacent locations
     //This function only checks for ADJACENT locations (even if out of bounds)
     //isValidMoves checks bounded points
-    static public Boolean isAdjacent(Point a, Point b) {//{{{
+    public Boolean isAdjacent(Point a, Point b) {//{{{
     	List<Point> adjacentPoints = getAdjacentPoints(a);
         for(Point p : adjacentPoints) {
             if(p.equals(b)) { return true; }
@@ -289,7 +299,7 @@ public class Grid extends JPanel{
     	return false;
     }//}}}
 
-    static public List<Point> getAdjacentPoints(Point a) {//{{{
+    public List<Point> getAdjacentPoints(Point a) {//{{{
     	List<Point> adjacentPoints = new ArrayList<Point>();
     	adjacentPoints.add(new Point(a.x, a.y + 1));
 		adjacentPoints.add(new Point(a.x, a.y - 1));
@@ -338,10 +348,10 @@ public class Grid extends JPanel{
         //restrictions:
         //  must capture if possible
         //isUnique to make sure the space is empty
-        //System.out.println("Can kill: " + canKill(a,b));
-        //System.out.println("Adjacent: " + isAdjacent(a,b));
-        //System.out.println("OnGrid: " + isOnGrid(b));
-        //System.out.println("Unqiue: " + isUnique(b));
+        System.out.println("Can kill: " + canKill(a,b));
+        System.out.println("Adjacent: " + isAdjacent(a,b));
+        System.out.println("OnGrid: " + isOnGrid(b));
+        System.out.println("Unqiue: " + isUnique(b));
         return isValidPaikaMove(a,b) && canKill(a,b);
     }//}}}
 
@@ -359,13 +369,12 @@ public class Grid extends JPanel{
     public List<Point> getValidCaptureMoves(Point a) {//{{{
         //returns a list of the valid pt B's when moving from pt A
         List<Point> neighbours = getAdjacentPoints(a);
-        List<Point> validEndPts = new ArrayList<Point>();
         for(Point b : neighbours) {
-            if(isValidMove(a, b)) { 
-                validEndPts.add(b);
+            if(!isValidMove(a, b)) { 
+                neighbours.remove(b);
             }
         }
-        return validEndPts;
+        return neighbours;
     }//}}}
 
     public Boolean isValidDoubleMove(Point a, Point b, java.util.List<Point> prevPositions, Point prevDirection) {//{{{
@@ -447,22 +456,14 @@ public class Grid extends JPanel{
     }//}}}
 
     public void killSacrifices(Boolean isNowPlayerTurn) {//{{{
-        //have to loop twice to avoid concurrency errors
-        //(can't delete from pieces while iterating through it)
-        List<Integer> toKillList = new ArrayList<Integer>();
-        for(int i = pieces.size() - 1; i > 0; i--) {
-            Piece p = pieces.get(i);
+        for(Piece p : pieces) {
             if(p.isSacrifice) {
                 if(p.isPlayer() && isNowPlayerTurn) {
-                    toKillList.add(i);     
+                    kill(p);
                 } else if(!p.isPlayer() && !isNowPlayerTurn) {
-                    toKillList.add(i);     
+                    kill(p);
                 }
             }
-        }
-        //the indices are going from largest to smallest just in case
-        for(int i : toKillList) {
-            pieces.remove(i);
         }
     }//}}}
 
