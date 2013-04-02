@@ -7,28 +7,37 @@ import java.util.Random;
 public class AI {
     AI() {}
     
-    private final int BLACKPIECE = -1;
-    private final int WHITEPIECE = 1;
-    private final int EMPTYSPOT = 0;
-	public int MAX_GRID_WIDTH_INDEX;
-	public int MAX_GRID_HEIGHT_INDEX;
+    static private final int BLACKPIECE = -1;
+    static private final int WHITEPIECE = 1;
+    static private final int EMPTYSPOT = 0;
+    static public int MAX_GRID_WIDTH_INDEX;
+    static public int MAX_GRID_HEIGHT_INDEX;
 	
-    Boolean gameOver(int[][] gameState){
-
-	// Place holder, code written just have to meld things together
-	// during our next meeting
-	return false;
+    static Boolean gameOver(int[][] gameState){
+    	
+    	int blackPieces = 0;
+    	int whitePieces = 0;
+    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
+				if(gameState[x][y] == 1) whitePieces++;
+				if(gameState[x][y] == -1) blackPieces++;
+			}
+		}
+    
+    	if( (whitePieces == 0) || (blackPieces == 0) ) return true;
+    	
+    	return false;
 	
     }
     
-    void setBounds(int rowSize, int columnSize){
+    static void setBounds(int rowSize, int columnSize){
     	
     	MAX_GRID_WIDTH_INDEX = rowSize;
     	MAX_GRID_HEIGHT_INDEX = columnSize;
     	
     }
     
-	int evaluateBoard(int[][] gameState){
+    static int evaluateBoard(int[][] gameState){
 		int value = 0;
 		
 		for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
@@ -40,7 +49,7 @@ public class AI {
 		return value;
 	}	
 	
-	public Boolean aiIsOnGrid(Point move) {
+	static public Boolean aiIsOnGrid(Point move) {
 		
         if(move.x < 1 || move.x > MAX_GRID_WIDTH_INDEX+1) return false;
         
@@ -49,12 +58,7 @@ public class AI {
         return true;
     }
 	
-	private Boolean aiIsStrongPoint(Point a){
-		
-        return (a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0);
-    }
-
-    ArrayList<Move> getValidMoves(int[][] gameState) {//{{{
+	static ArrayList<Move> getValidMoves(int[][] gameState) {//{{{
     	
     	int movingColor = 0;
     	int fwdColor = 0;
@@ -116,7 +120,7 @@ public class AI {
 	    return validMoves;    
     }
     
-    ArrayList<Move> getValidPaikaMoves(int[][] gameState) {//{{{
+	static ArrayList<Move> getValidPaikaMoves(int[][] gameState) {//{{{
     	
     	ArrayList<Point> blackPawnLocations = new ArrayList<Point>();
     	ArrayList<Move> validMoves = new ArrayList<Move>();  	
@@ -146,58 +150,106 @@ public class AI {
 	        
 	    return validMoves;    
     }
-	
-    int[][] alphaBetaSearch(int[][] gameState){
+    
+    
+    
+    static public Move minimax (int[][] gameBoard){
+        
+        
+        int[][] nextBoard;
+        int value, maxValue = Integer.MIN_VALUE;
+        Move bestMove = new Move();
+        
+        ArrayList<Move> possibleMoveList = getValidMoves(gameBoard);
+        
+        if(possibleMoveList.size() != 0) bestMove = new Move(possibleMoveList.get(0));
+        
+        for (Move possibleMove: possibleMoveList){
+        	
+          nextBoard = (int[][]) gameBoard.clone();
+          
+          nextBoard = possibleMove.makeMove(gameBoard);
+          value = minMove(nextBoard, 5, maxValue, Integer.MAX_VALUE);
 
-    	int bestMove = maxValue(gameState,5,-99999,99999);
+          if (value > maxValue) {
+        	System.out.println ("Max value : " + value + " at depth : 0");
+            maxValue = value;
+            bestMove = new Move(possibleMove);
+          }
+        }
 
-    	return null;
-    } 
+        System.out.println ("Move value selected : " + maxValue + " at depth : 0");
 
+        return bestMove;
+      }
+    
+      static public int maxMove (int[][] gameBoard, int depth, int alpha, int beta){
 
-    int maxValue(int[][] gameState, int depth, int alpha, int beta){
+    	if ( gameOver(gameBoard) || depth <= 0 ) return evaluateBoard(gameBoard);
+    	
+        int[][] nextBoard;
+        int value;        
+        ArrayList<Move> possibleMoveList = getValidMoves(gameBoard);
 
+        System.out.println ("Max node at depth : " + depth + " with alpha : " + alpha + 
+                            " beta : " + beta);
+        
+        for (Move possibleMove: possibleMoveList){
+        	
+          nextBoard = (int[][]) gameBoard.clone();
+          nextBoard = possibleMove.makeMove(gameBoard);
+          
+          value = minMove (nextBoard, depth - 1, alpha, beta);
 
-        if ( gameOver(gameState) || depth <= 0) return evaluateBoard(gameState);
+          if (value > alpha) {
+            alpha = value;
+            System.out.println ("Max value : " + value + " at depth : " + depth);
+          }
+
+          if (alpha > beta) {
+        	System.out.println ("Max value with prunning : " + beta + " at depth : " + depth);
+            return beta;
+          }
+      
+        }
+
+        System.out.println ("Max value selected : " + alpha + " at depth : " + depth);
+        return alpha;
+      }
+      
+	static public int minMove (int[][] gameBoard, int depth, int alpha, int beta){
+	   
+		if ( gameOver(gameBoard) || depth <= 0 ) return evaluateBoard(gameBoard);
 		
-        int bestMove = -99999;
-        int [][] previousBoard; 
-        ArrayList<Move> validMoves = getValidMoves(gameState);
-
-        for (Move move: validMoves){
+		int[][] nextBoard;
+		int value;          
+		ArrayList<Move> possibleMoveList = getValidMoves(gameBoard);
+		
+		System.out.println ("Min node at depth : " + depth + " with alpha : " + alpha + 
+		                    " beta : " + beta);
+		
+		for (Move possibleMove: possibleMoveList){
         	
-        	
-        	gameState = move.makeMove(gameState);
-        	move.setValue( evaluateBoard(gameState) );
-            bestMove = Math.max(bestMove,minValue(gameState, depth-1, alpha, beta));	        			
-            alpha = Math.max(alpha, bestMove);
-            
-            if (bestMove >= beta) return bestMove;
-        }
-        return bestMove;
-    }
+	      nextBoard = (int[][]) gameBoard.clone();
+	      nextBoard = possibleMove.makeMove(gameBoard);
+		  value = maxMove (nextBoard, depth - 1, alpha, beta);
+		
+		  if (value < beta) {
+		    beta = value;
+		    System.out.println ("Min value : " + value + " at depth : " + depth);
+		  }
+		
+		  if (beta < alpha) {
+		    System.out.println ("Min value with prunning : " + alpha + " at depth : " + depth);
+		    return alpha;
+		  }
+		}
+		
+		System.out.println ("Min value selected : " + beta + " at depth : " + depth);
+		return beta;
+	}    
 
-    int minValue(int[][] gameState, int depth, int alpha, int beta){
-
-
-        if ( gameOver(gameState) || depth <= 0 ) return evaluateBoard(gameState);
-
-        int bestMove = 99999;
-        ArrayList<Move> validMoves = getValidMoves(gameState);
-
-        for (Move move: validMoves){
-        	
-        	gameState = move.makeMove(gameState);
-        	move.setValue( evaluateBoard(gameState) );
-            bestMove = Math.min(bestMove, maxValue(gameState, depth-1, alpha, beta));
-            beta = Math.min(beta, bestMove);
-	    
-            if (bestMove <= alpha) return bestMove;
-        }
-        return bestMove;
-    }
-
-    public Move getMove(int[][] gridState) {
+    static public Move getMove(int[][] gridState) {
         //returns a Move which is 2 pts: start & end
     	Random rand = new Random();
     	int min = 0;
@@ -205,17 +257,8 @@ public class AI {
     	int randomNum = 0;
     	ArrayList<Move> captureMoves = getValidMoves(gridState);
     	if( captureMoves.size() != 0){
-    		max = captureMoves.size() - 1;
-    		randomNum = rand.nextInt(max - min + 1) + min;
     		
-    		System.out.println("GM. Random int chosen: " + randomNum + " " +
-					   "Number of move choices: " + captureMoves.size());
-    		
-    		Move bestMove = captureMoves.get(randomNum);
-    		
-    		System.out.println("GM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
-        	System.out.println("GM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
-      		return bestMove;
+      		return minimax(gridState);
     	}
     	else{
     	
@@ -224,8 +267,6 @@ public class AI {
     		randomNum = rand.nextInt(max - min + 1) + min;
     		Move bestMove = paikaMoves.get(randomNum);
     		
-    		System.out.println("GM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
-        	System.out.println("GM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
     		return bestMove;
     	
     	}    	
@@ -239,13 +280,8 @@ public class AI {
     	int max = validEndPts.size() - 1;    	
     	int randomNum = rand.nextInt(max - min + 1) + min;
     	
-    	System.out.println("GDM. Random int chosen: " + randomNum + " " +
-    					   "Number of move choices: " + validEndPts.size());
-    	
         Point endPoint = validEndPts.get(randomNum);
         Move bestMove = new Move(selectedPiece.x, selectedPiece.y, endPoint.x, endPoint.y);
-        System.out.println("GDM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
-    	System.out.println("GDM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
         return bestMove;
     }
 }
