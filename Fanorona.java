@@ -192,9 +192,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
     public void mouseEntered(MouseEvent evt) {}
     public void mouseExited(MouseEvent evt) {}
-    public void mousePressed(MouseEvent evt) {}
-    public void mouseReleased(MouseEvent evt) {}
-    public void mouseClicked(MouseEvent evt) {//{{{
+    public void mousePressed(MouseEvent evt) {
     	if(clickingIsAllowed()) {
             if(SwingUtilities.isRightMouseButton(evt)) {
                 String message = stateMachine.run("RClick", null);
@@ -206,7 +204,9 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         }
         //start AI on transition to enemy turn
     	runAI();
-    }//}}}
+    }
+    public void mouseReleased(MouseEvent evt) {}
+    public void mouseClicked(MouseEvent evt) {}
     
     private Boolean clickingIsAllowed() {//{{{
         return !aiIsOn || (aiIsOn && stateMachine.isPlayerTurn());
