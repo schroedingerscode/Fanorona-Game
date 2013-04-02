@@ -68,6 +68,7 @@ public class StateMachine {
             setState(State.GAME_OVER);
         } else if (evtType == "NewGame") {
             newGame(p);
+            try{out.flush();} catch (Exception e) {}
             if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
             	setState(State.ENEMY_SELECT);
             	handleRemoteInput();
@@ -77,10 +78,12 @@ public class StateMachine {
 	        	setState(State.PLAYER_SELECT);
 	        }
         } else if(evtType == "Click") {
+        	try{out.flush();} catch (Exception e) {}
             handleClick(grid.asGridCoor(p), 0);
         } else if(evtType == "AIChoice") {
             handleClick(p, 1);
         } else if(evtType == "RClick") {
+        	try{out.flush();} catch (Exception e) {}
             handleRClick();
         }
         return messageForCurrentState();
@@ -186,7 +189,7 @@ public class StateMachine {
                     	System.out.println("MOVE");
                         this.movePiece(pt, false, dir);
                         handleChainedMove(dir); //sets next state
-                    } else if(grid.paikaAllowed(a)){
+                    } else if(grid.paikaAllowed(a) && grid.isValidPaikaMove(a,pt)){
                         this.movePiece(pt, true, dir);
                         endTurn();
                     } else { grid.illegalMove(); }
@@ -330,6 +333,7 @@ public class StateMachine {
         deselectPiece();
         selectedPiece = grid.getPieceAt(pt);
         selectedPiece.sacrifice();
+        moveString += ("S" + pt.x + " " + pt.y);
         grid.repaint();
     }//}}}
 

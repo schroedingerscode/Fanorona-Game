@@ -282,7 +282,7 @@ public class Grid extends JPanel{
         return true;
     }//}}}
     
-    private Boolean isStrongPoint(Point a) {//{{{
+    static private Boolean isStrongPoint(Point a) {//{{{
         //(odd,odd) or (even,even)
         return (a.x % 2 == 1 && a.y % 2 == 1) || (a.x % 2 == 0 && a.y %2 == 0);
     }//}}}
@@ -291,7 +291,7 @@ public class Grid extends JPanel{
     //Points where x and y are not both odd or even results in only 4 adjacent locations
     //This function only checks for ADJACENT locations (even if out of bounds)
     //isValidMoves checks bounded points
-    public Boolean isAdjacent(Point a, Point b) {//{{{
+    static public Boolean isAdjacent(Point a, Point b) {//{{{
     	List<Point> adjacentPoints = getAdjacentPoints(a);
         for(Point p : adjacentPoints) {
             if(p.equals(b)) { return true; }
@@ -299,7 +299,7 @@ public class Grid extends JPanel{
     	return false;
     }//}}}
 
-    public List<Point> getAdjacentPoints(Point a) {//{{{
+    static public List<Point> getAdjacentPoints(Point a) {//{{{
     	List<Point> adjacentPoints = new ArrayList<Point>();
     	adjacentPoints.add(new Point(a.x, a.y + 1));
 		adjacentPoints.add(new Point(a.x, a.y - 1));
@@ -348,10 +348,10 @@ public class Grid extends JPanel{
         //restrictions:
         //  must capture if possible
         //isUnique to make sure the space is empty
-        System.out.println("Can kill: " + canKill(a,b));
-        System.out.println("Adjacent: " + isAdjacent(a,b));
-        System.out.println("OnGrid: " + isOnGrid(b));
-        System.out.println("Unqiue: " + isUnique(b));
+        //System.out.println("Can kill: " + canKill(a,b));
+        //System.out.println("Adjacent: " + isAdjacent(a,b));
+        //System.out.println("OnGrid: " + isOnGrid(b));
+        //System.out.println("Unqiue: " + isUnique(b));
         return isValidPaikaMove(a,b) && canKill(a,b);
     }//}}}
 
@@ -369,12 +369,13 @@ public class Grid extends JPanel{
     public List<Point> getValidCaptureMoves(Point a) {//{{{
         //returns a list of the valid pt B's when moving from pt A
         List<Point> neighbours = getAdjacentPoints(a);
+        List<Point> validEndPts = new ArrayList<Point>();
         for(Point b : neighbours) {
-            if(!isValidMove(a, b)) { 
-                neighbours.remove(b);
+        	if(isValidMove(a, b)) { 
+        		validEndPts.add(b);
             }
         }
-        return neighbours;
+        return validEndPts;
     }//}}}
 
     public Boolean isValidDoubleMove(Point a, Point b, java.util.List<Point> prevPositions, Point prevDirection) {//{{{
@@ -456,15 +457,23 @@ public class Grid extends JPanel{
     }//}}}
 
     public void killSacrifices(Boolean isNowPlayerTurn) {//{{{
-        for(Piece p : pieces) {
+    	//have to loop twice to avoid concurrency errors
+    	//(can't delete from pieces while iterating through it)
+    	List<Integer> toKillList = new ArrayList<Integer>();
+    	for(int i = pieces.size() - 1; i > 0; i--) {
+    		Piece p = pieces.get(i);
             if(p.isSacrifice) {
                 if(p.isPlayer() && isNowPlayerTurn) {
-                    kill(p);
+                	toKillList.add(i);
                 } else if(!p.isPlayer() && !isNowPlayerTurn) {
-                    kill(p);
+                	toKillList.add(i);
                 }
             }
         }
+    	//the indices are going from largest to smallest just in case
+    	for(int i : toKillList) {
+    		pieces.remove(i);
+    	}
     }//}}}
 
     public void illegalMove() {
