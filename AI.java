@@ -31,8 +31,8 @@ public class AI {
 	int evaluateBoard(int[][] gameState){
 		int value = 0;
 		
-		for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
-			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
+		for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
 				if(gameState[x][y] == 1) value++;
 				if(gameState[x][y] == -1) value--;
 			}
@@ -204,8 +204,13 @@ public class AI {
     	int max = 0;    	
     	int randomNum = 0;
     	ArrayList<Move> captureMoves = getValidMoves(gridState);
-    	if( ( max = captureMoves.size() ) != 0){    		
+    	if( captureMoves.size() != 0){
+    		max = captureMoves.size() - 1;
     		randomNum = rand.nextInt(max - min + 1) + min;
+    		
+    		System.out.println("GM. Random int chosen: " + randomNum + " " +
+					   "Number of move choices: " + captureMoves.size());
+    		
     		Move bestMove = captureMoves.get(randomNum);
     		
     		System.out.println("GM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
@@ -215,7 +220,7 @@ public class AI {
     	else{
     	
     		ArrayList<Move> paikaMoves = getValidPaikaMoves(gridState);
-    		max = paikaMoves.size();
+    		max = paikaMoves.size() - 1;
     		randomNum = rand.nextInt(max - min + 1) + min;
     		Move bestMove = paikaMoves.get(randomNum);
     		
