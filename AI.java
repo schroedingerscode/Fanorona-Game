@@ -1,6 +1,8 @@
 import java.awt.Point;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class AI {
     AI() {}
@@ -60,8 +62,8 @@ public class AI {
     	ArrayList<Point> blackPawnLocations = new ArrayList<Point>();
     	ArrayList<Move> validMoves = new ArrayList<Move>();
     	
-    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
-			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
+    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
 				
 				if(gameState[x][y] == BLACKPIECE){
 					
@@ -83,6 +85,8 @@ public class AI {
     	int fwdColor = 0;
     	int bkwdColor = 0;
     	
+    	System.out.println("Number of black pawns: " + blackPawnLocations.size());
+    	
 	    for (Point startLocation: blackPawnLocations){
 	    	
 	    	//We already know it's adjacent
@@ -90,9 +94,11 @@ public class AI {
 	    	//Check if it has killable neighbors
 	    	//Check if it's an empty spot
 	    	
+	    	System.out.println("Current pawn stats: (" + startLocation.x + "," + startLocation.y + ")");
 	    	
 	    	//Case 1 ... x , y + 1
 	    	//If it's on the grid and the destination spot is empty...
+	    	System.out.println("Case 1 on Grid: " + aiIsOnGrid(new Point(startLocation.x, startLocation.y + 1)));
 	    	if( aiIsOnGrid(new Point(startLocation.x, startLocation.y + 1)) 
 	    	&& (gameState[startLocation.x-1][startLocation.y] == EMPTYSPOT) ){
 	    		
@@ -129,6 +135,7 @@ public class AI {
 	    		}
 	    	}
 	    	//Case 2 ... x , y - 1
+	    	System.out.println("Case 2 on Grid: " + aiIsOnGrid(new Point(startLocation.x, startLocation.y - 1)));
 	    	if( aiIsOnGrid(new Point(startLocation.x, startLocation.y - 1)) 
 	    	&& (gameState[startLocation.x-1][startLocation.y-2] == EMPTYSPOT) ){
 	    		
@@ -136,7 +143,8 @@ public class AI {
 	    		Point fwd = Vector.subtract(newLocation,startLocation); //forward
     	        Point fwdTarPt = Vector.add(newLocation,fwd); //target point
     	        Point bkwd = Vector.subtract(startLocation,newLocation); //backward
-    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point
+    	        Point bkwdTarPt = Vector.add(startLocation,bkwd); //target point	        
+    	        
     	        
     	        movingColor = gameState[startLocation.x-1][startLocation.y-1];
     	        
@@ -416,14 +424,26 @@ public class AI {
     	ArrayList<Move> allMoves = getValidMoves(gridState);
     	Move bestMove = allMoves.get(0);
 
-    	System.out.println("AI.JAVA " + bestMove.startPointX + " " + bestMove.startPointY);
-    	System.out.println("AI.JAVA " + bestMove.endPointX + " " + bestMove.endPointY);
+    	System.out.println("GM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
+    	System.out.println("GM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
     	
         return bestMove;
     }
 
-    static public Move getDoubleMove(int[][] gridState, List<Point> validEndPts) {
-        //only need the end point & the direction
-        return new Move(0,0,0,0);
+    static public Move getDoubleMove(int[][] gridState, Point selectedPiece, List<Point> validEndPts) {
+    	
+    	Random rand = new Random();
+    	int min = 0;
+    	int max = validEndPts.size() - 1;    	
+    	int randomNum = rand.nextInt(max - min + 1) + min;
+    	
+    	System.out.println("GDM. Random int chosen: " + randomNum + " " +
+    					   "Number of move choices: " + validEndPts.size());
+    	
+        Point endPoint = validEndPts.get(randomNum);
+        Move bestMove = new Move(selectedPiece.x, selectedPiece.y, endPoint.x, endPoint.y);
+        System.out.println("GDM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
+    	System.out.println("GDM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
+        return bestMove;
     }
 }
