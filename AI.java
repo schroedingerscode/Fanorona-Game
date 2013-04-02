@@ -207,7 +207,7 @@ public class AI {
           }
 
           if (alpha > beta) {
-        	System.out.println ("Max value with prunning : " + beta + " at depth : " + depth);
+        	System.out.println ("Max value with pruning : " + beta + " at depth : " + depth);
             return beta;
           }
       
@@ -240,7 +240,7 @@ public class AI {
 		  }
 		
 		  if (beta < alpha) {
-		    System.out.println ("Min value with prunning : " + alpha + " at depth : " + depth);
+		    System.out.println ("Min value with pruning : " + alpha + " at depth : " + depth);
 		    return alpha;
 		  }
 		}
