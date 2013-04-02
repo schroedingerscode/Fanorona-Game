@@ -181,11 +181,13 @@ public class StateMachine {
             case MOVE:
                 if(id == 0) { //empty space
                     Point a = selectedPiece.position();
+                    //System.out.println("PAIKA?: " + grid.paikaAllowed(a));
                     if (grid.isValidMove(a, pt)) {
                     	System.out.println("MOVE");
                         this.movePiece(pt, false, dir);
                         handleChainedMove(dir); //sets next state
-                    } else if(grid.paikaAllowed(a)){
+                    } else if(grid.paikaAllowed(a) && grid.isValidPaikaMove(a,pt)){
+                    	System.out.println("PAIKA!!!");
                         this.movePiece(pt, true, dir);
                         endTurn();
                     } else { grid.illegalMove(); }
