@@ -35,7 +35,6 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	
 	String playerName;
 	int timePerTurn;
-	Clock clock;
 	
 	String networkSetting;
 	String serverName;
@@ -132,14 +131,6 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
         String message = stateMachine.run("NewGame", null);
         messageBox.setText(message);
-        
-        clock = new Clock(timePerTurn);
-        EventQueue.invokeLater(new Runnable() {
-        	@Override
-            public void run() {
-                clock.startTimer();
-            }
-        });
 	} //}}}
 
 	public void createGrid() {
@@ -176,29 +167,22 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
         newGameButton = new JButton("New Game");
         aiButton = new JButton("Toggle AI");
         nameButton = new JButton("Change Name");
-        timerBox = new JLabel("",JLabel.LEFT);
-        timerBox.setVerticalAlignment(JLabel.TOP);
-        timerBox.setFont(new Font("Serif", Font.BOLD, 12));
-        timerBox.setForeground(Color.BLACK);
         messageBox = new JLabel("",JLabel.LEFT);
         messageBox.setVerticalAlignment(JLabel.TOP);
-        messageBox.setFont(new Font("Serif", Font.BOLD, 12));
+        messageBox.setFont(new Font("Serif", Font.BOLD, 14));
         messageBox.setForeground(Color.BLACK);
 
 		add(newGameButton);
         add(aiButton);
 		add(instructionsButton);	
 		add(nameButton);
-		add(timerBox);
 		add(messageBox);
 				
 		newGameButton.setBounds(10, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		instructionsButton.setBounds(BUTTON_SIZE_WIDTH+20, 10, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		nameButton.setBounds(10, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
 		aiButton.setBounds(BUTTON_SIZE_WIDTH+20, BUTTON_SIZE_HEIGHT+20, BUTTON_SIZE_WIDTH, BUTTON_SIZE_HEIGHT);
-		
-		timerBox.setBounds(10, (BUTTON_SIZE_HEIGHT*2)+25, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT);
-		messageBox.setBounds(10, (BUTTON_SIZE_HEIGHT*3)+25, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
+		messageBox.setBounds(10, (BUTTON_SIZE_HEIGHT*2)+30, BUTTON_SIZE_WIDTH*2, BUTTON_SIZE_HEIGHT*4);
     }//}}}
 
     public void mouseEntered(MouseEvent evt) {}
@@ -466,41 +450,4 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
                 "* The game ends when one player captures all stones of the opponent. If neither player can achieve this, the game is a draw.\n";
         JOptionPane.showMessageDialog(this, instructionDialog, "Fanorona Instructions", JOptionPane.PLAIN_MESSAGE);
     }//}}}
-    
-    public class Clock {
-        private Timer timer = new Timer();
-        private int timeRemaining;
-        private boolean timerOff;
-
-        public Clock(int time) {
-        	timeRemaining = time;
-        	if(time <= 0)
-        		timerOff = true;
-        	else
-        		timerOff = false;
-        }
-
-        private class UpdateUITask extends TimerTask {
-            @Override
-            public void run() {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                    	if(timeRemaining <= 0) {
-                    		System.out.println("LOSER");
-                    		timer.cancel();
-                    	}
-                        timerBox.setText("Time left for turn (seconds): " + String.valueOf(timeRemaining--));
-                    }
-                });
-            }
-        }
-        
-        public void startTimer() {
-        	if(timerOff)
-        		timerBox.setText("Time left for turn (seconds): OFF");
-        	else
-        		timer.schedule(new UpdateUITask(), timeRemaining, 1000);
-        }
-    }
 }
