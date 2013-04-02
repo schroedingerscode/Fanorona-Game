@@ -17,8 +17,8 @@ public class AI {
     	
     	int blackPieces = 0;
     	int whitePieces = 0;
-    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
-			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
+    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
 				if(gameState[x][y] == 1) whitePieces++;
 				if(gameState[x][y] == -1) blackPieces++;
 			}
@@ -40,8 +40,8 @@ public class AI {
     static int evaluateBoard(int[][] gameState){
 		int value = 0;
 		
-		for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
-			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
+		for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
 				if(gameState[x][y] == 1) value++;
 				if(gameState[x][y] == -1) value--;
 			}
@@ -51,9 +51,9 @@ public class AI {
 	
 	static public Boolean aiIsOnGrid(Point move) {
 		
-        if(move.x < 1 || move.x > MAX_GRID_WIDTH_INDEX+1) return false;
+        if(move.x < 1 || move.x > MAX_GRID_WIDTH_INDEX) return false;
         
-        if(move.y < 1 || move.y > MAX_GRID_HEIGHT_INDEX+1) return false; 
+        if(move.y < 1 || move.y > MAX_GRID_HEIGHT_INDEX) return false; 
         
         return true;
     }
@@ -69,8 +69,8 @@ public class AI {
     	
     	//For our current board, we want to find all of the black pawns on the board.
     	
-    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
-			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
+    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
 				
 				if(gameState[x][y] == BLACKPIECE){
 					
@@ -125,8 +125,8 @@ public class AI {
     	ArrayList<Point> blackPawnLocations = new ArrayList<Point>();
     	ArrayList<Move> validMoves = new ArrayList<Move>();  	
     	
-    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
-			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
+    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX; y++){ 
 				
 				if(gameState[x][y] == BLACKPIECE){
 					
@@ -207,7 +207,7 @@ public class AI {
           }
 
           if (alpha > beta) {
-        	System.out.println ("Max value with pruning : " + beta + " at depth : " + depth);
+        	System.out.println ("Max value with prunning : " + beta + " at depth : " + depth);
             return beta;
           }
       
@@ -240,7 +240,7 @@ public class AI {
 		  }
 		
 		  if (beta < alpha) {
-		    System.out.println ("Min value with pruning : " + alpha + " at depth : " + depth);
+		    System.out.println ("Min value with prunning : " + alpha + " at depth : " + depth);
 		    return alpha;
 		  }
 		}
