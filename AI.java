@@ -115,6 +115,37 @@ public class AI {
 	        
 	    return validMoves;    
     }
+    
+    ArrayList<Move> getValidPaikaMoves(int[][] gameState) {//{{{
+    	
+    	ArrayList<Point> blackPawnLocations = new ArrayList<Point>();
+    	ArrayList<Move> validMoves = new ArrayList<Move>();  	
+    	
+    	for (int x = 0; x < MAX_GRID_WIDTH_INDEX+1; x++){ 
+			for (int y = 0; y < MAX_GRID_HEIGHT_INDEX+1; y++){ 
+				
+				if(gameState[x][y] == BLACKPIECE){
+					
+					blackPawnLocations.add(new Point(x + 1,y + 1));
+					
+				}
+			}
+		}
+    	
+	    for (Point startLocation: blackPawnLocations){
+	    	
+	    	List<Point> adjacentMoves = Grid.getAdjacentPoints(startLocation);
+	    	
+	    	for(Point adjacentMove: adjacentMoves){
+	    		
+	    		if(aiIsOnGrid(adjacentMove) && (gameState[adjacentMove.x-1][adjacentMove.y-1] == EMPTYSPOT) )  			
+	    			validMoves.add(new Move(startLocation.x, startLocation.y, adjacentMove.x, adjacentMove.y) );	     	
+		    		
+	    	}	    		
+	    }
+	        
+	    return validMoves;    
+    }
 	
     int[][] alphaBetaSearch(int[][] gameState){
 
@@ -168,13 +199,32 @@ public class AI {
 
     public Move getMove(int[][] gridState) {
         //returns a Move which is 2 pts: start & end
-    	ArrayList<Move> allMoves = getValidMoves(gridState);
-    	Move bestMove = allMoves.get(0);
-
-    	System.out.println("GM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
-    	System.out.println("GM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
+    	Random rand = new Random();
+    	int min = 0;
+    	int max = 0;    	
+    	int randomNum = 0;
+    	ArrayList<Move> captureMoves = getValidMoves(gridState);
+    	if( ( max = captureMoves.size() ) != 0){    		
+    		randomNum = rand.nextInt(max - min + 1) + min;
+    		Move bestMove = captureMoves.get(randomNum);
+    		
+    		System.out.println("GM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
+        	System.out.println("GM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
+      		return bestMove;
+    	}
+    	else{
     	
-        return bestMove;
+    		ArrayList<Move> paikaMoves = getValidPaikaMoves(gridState);
+    		max = paikaMoves.size();
+    		randomNum = rand.nextInt(max - min + 1) + min;
+    		Move bestMove = paikaMoves.get(randomNum);
+    		
+    		System.out.println("GM START POINT (" + bestMove.startPointX + "," + bestMove.startPointY + ")");
+        	System.out.println("GM END POINT (" + bestMove.endPointX + "," + bestMove.endPointY + ")");
+    		return bestMove;
+    	
+    	}    	
+        
     }
 
     static public Move getDoubleMove(int[][] gridState, Point selectedPiece, List<Point> validEndPts) {
