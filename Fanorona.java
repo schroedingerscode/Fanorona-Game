@@ -118,7 +118,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		stateMachine.grid.setBounds(BUTTON_SIZE_WIDTH*2+30,1,(int)((colSize*100+100)*changeFactor),(int)((rowSize*100+100)*changeFactor)); 
 		
         ai = new AI();
-        ai.setBounds(colSize - 1 , rowSize - 1);
+        ai.setBounds(colSize, rowSize);
         aiIsOn = false;
 
         initButtons();
