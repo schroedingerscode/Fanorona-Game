@@ -299,7 +299,8 @@ public class StateMachine {
         //dir == 0 means is AI, don't prompt, but do call the AI again
         if(grid.canMoveAgain(selectedPiece.position(), prevPositions, prevDirection)) {
             if(dir != 0) {
-                AI.getDoubleMove(grid.getState(), grid.getDoubleMoves(selectedPiece.position(), prevPositions, prevDirection));
+               Move m = AI.getDoubleMove(grid.getState(), selectedPiece.position(), grid.getDoubleMoves(selectedPiece.position(), prevPositions, prevDirection));
+               this.run("AIChoice", m.getEndPoint());
             } else {
                 grid.multiTurnMessage();
             }
