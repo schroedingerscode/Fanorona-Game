@@ -25,6 +25,26 @@ public class Move{
 		valueOfMove = 0;
 	}
 	
+	public Move(){
+	
+		startPointX = 0;
+		startPointY = 0;
+		endPointX = 0;
+		endPointY = 0;
+		valueOfMove = 0;	
+	}
+	
+	//Copy constructor
+	public Move(Move other) {
+		
+	    this.startPointX = other.startPointX;
+	    this.startPointY = other.startPointY;
+	    this.endPointX = other.endPointX;
+	    this.endPointY = other.endPointY;
+	    this.valueOfMove = other.valueOfMove;
+	    
+	  }
+	
 	public void setValue(int value) { valueOfMove = value; } 
 	
 	//Return a point created from the starting coordinates of the move.
@@ -47,15 +67,15 @@ public class Move{
 		Boolean captureDir = true; //For now, always assume capture forward when the choice is given.
 		
 		//White is moving, original spot now empty, new spot has white pawn
-		if(gameBoard[startPoint.x][startPoint.y] == WHITEPIECE){
-			gameBoard[startPoint.x][startPoint.y] = EMPTYSPOT;
-			gameBoard[endPoint.x][endPoint.y] = WHITEPIECE;
+		if(gameBoard[startPoint.x-1][startPoint.y-1] == WHITEPIECE){
+			gameBoard[startPoint.x-1][startPoint.y-1] = EMPTYSPOT;
+			gameBoard[endPoint.x-1][endPoint.y-1] = WHITEPIECE;
 			colorToKill = BLACKPIECE;
 		}
 		//Otherwise black is moving, original spot empty, new spot has black pawn
 		else{
-			gameBoard[startPoint.x][startPoint.y] = EMPTYSPOT;
-			gameBoard[endPoint.x][endPoint.y] = BLACKPIECE;
+			gameBoard[startPoint.x-1][startPoint.y-1] = EMPTYSPOT;
+			gameBoard[endPoint.x-1][endPoint.y-1] = BLACKPIECE;
 			colorToKill = WHITEPIECE;
 		}
 		
@@ -75,14 +95,14 @@ public class Move{
         
     	Point nextPt = Vector.add(nextStart,directionOfAttack);
     	
-        if(nextPt.x <= gameBoard.length && nextPt.y <= gameBoard[0].length ) {
+        if(Grid.isOnGrid(nextPt) ) {
+        	
+        	if(gameBoard[nextPt.x-1][nextPt.y-1] == EMPTYSPOT ) { return gameBoard; } //done killing
             
-        	if(gameBoard[nextPt.x][nextPt.y] == EMPTYSPOT ) { return gameBoard; } //done killing
-            
-            int victim = gameBoard[nextPt.x][nextPt.y];
+            int victim = gameBoard[nextPt.x-1][nextPt.y-1];
             
             if(victim == colorToKill) { 
-            	gameBoard[nextPt.x][nextPt.x] = EMPTYSPOT;
+            	gameBoard[nextPt.x-1][nextPt.y-1] = EMPTYSPOT;
                 return aiKillNext(nextPt, directionOfAttack, colorToKill, gameBoard);
             }
         }
