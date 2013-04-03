@@ -182,7 +182,7 @@ public class Grid extends JPanel{
         return state;
     }//}}}
 	
-	boolean checkWinningState(ObjectOutputStream out){//{{{
+	boolean checkWinningState(ObjectOutputStream out, Boolean invert){//{{{
 		int white = 0;
 		int black = 0;
 		for(Piece p : pieces) {
@@ -191,28 +191,53 @@ public class Grid extends JPanel{
 			else
 				black++;
 		}
-		if(white <= 0) {
-			try {
-				String loseString = "LOSER";
-				out.flush();
-				out.writeObject(loseString);
-				out.flush();
-			} catch (Exception e) {}
-			loseMessage();
-			return true;
+		if(invert) {
+			if(white <= 0) {
+				try {
+					String loseString = "LOSER";
+					out.flush();
+					out.writeObject(loseString);
+					out.flush();
+				} catch (Exception e) {}
+				loseMessage();
+				return true;
+			}
+			else if(black <= 0) {
+				try {
+					String winString = "WINNER";
+					out.flush();
+					out.writeObject(winString);
+					out.flush();
+				} catch (Exception e) {}
+				winMessage();
+				return true;
+			}
+			else
+				return false;
+		} else {
+			if(white <= 0) {
+				try {
+					String loseString = "WINNER";
+					out.flush();
+					out.writeObject(loseString);
+					out.flush();
+				} catch (Exception e) {}
+				winMessage();
+				return true;
+			}
+			else if(black <= 0) {
+				try {
+					String winString = "LOSER";
+					out.flush();
+					out.writeObject(winString);
+					out.flush();
+				} catch (Exception e) {}
+				loseMessage();
+				return true;
+			}
+			else
+				return false;
 		}
-		else if(black <= 0) {
-			try {
-				String winString = "WINNER";
-				out.flush();
-				out.writeObject(winString);
-				out.flush();
-			} catch (Exception e) {}
-			winMessage();
-			return true;
-		}
-		else
-			return false;	
 	}//}}}
 	
     public Piece getPieceAt(Point pt) {//{{{

@@ -256,7 +256,8 @@ public class StateMachine {
             		}
 	            }
             }
-            if(grid.checkWinningState(out) || clock.gameOver())
+            Boolean invert = ((networkSetting.equals("Client") && clientStartingSide.equals("W")) || (networkSetting.equals("Server") && clientStartingSide.equals("W")))?true:false;
+            if(grid.checkWinningState(out, invert) || clock.gameOver())
             	setState(State.GAME_OVER);
     }//}}}
     
@@ -319,7 +320,7 @@ public class StateMachine {
                 break;
             //the other states do not respond to "Click" events
         }
-        if(grid.checkWinningState(out) || clock.gameOver())
+        if(grid.checkWinningState(out, false) || clock.gameOver())
         	setState(State.GAME_OVER);
     }//}}}
 
