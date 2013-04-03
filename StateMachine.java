@@ -128,12 +128,12 @@ public class StateMachine {
     	if(waitForOKFlag) {
 	    	String okAck = "";
 	        try{okAck = (String)in.readObject();} catch (Exception e) {}
-	        System.out.println(okAck);
+	       // System.out.println(okAck);
     	}
             String coords = "";
-            System.out.println("Waiting...");
+           System.out.println("Waiting on other player to make a move...");
             try{coords = (String)in.readObject();} catch (Exception e) {}
-            System.out.println("ZZZZ: " + coords);
+           // System.out.println("ZZZZ: " + coords);
             if(coords.equals("ILLEGAL") || coords.equals("TIME") || coords.equals("LOSER") || coords.equals("WINNER") || coords.equals("TIE")) {
             	return;
             }
@@ -152,7 +152,7 @@ public class StateMachine {
 		            		selectPiece(selectedPoint);
 		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		            		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
-		                    	System.out.println("LARGE REMOTE MOVE");
+		                    	//System.out.println("LARGE REMOTE MOVE");
 		                        this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
 		                        clearTempData();
 		                        if(outOfMoves()) { 
@@ -167,7 +167,7 @@ public class StateMachine {
 		            		selectPiece(selectedPoint);
 		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		            		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
-		                    	System.out.println("LARGE REMOTE MOVE");
+		                    	//System.out.println("LARGE REMOTE MOVE");
 		                        this.movePiece(movePoint, false, -1); //TEMP NAM assuming fwd
 		                        clearTempData();
 		                        if(outOfMoves()) { 
@@ -182,7 +182,7 @@ public class StateMachine {
 		            		selectPiece(selectedPoint);
 		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		            		if(grid.paikaAllowed(selectedPiece, selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
-		                    	System.out.println("LARGE REMOTE MOVE");
+		                    	//System.out.println("LARGE REMOTE MOVE");
 		                        this.movePiece(movePoint, true, 0); //TEMP NAM assuming fwd
 		                        clearTempData();
 		                        if(outOfMoves()) { 
@@ -208,7 +208,7 @@ public class StateMachine {
 		        		selectPiece(selectedPoint);
 		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		        		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
-		                	System.out.println("REMOTE MOVE");
+		                	//System.out.println("REMOTE MOVE");
 		                    this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
 		                    clearTempData();
 		                    if(outOfMoves()) { 
@@ -223,7 +223,7 @@ public class StateMachine {
 		        		selectPiece(selectedPoint);
 		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		        		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
-		                	System.out.println("REMOTE MOVE");
+		                	//System.out.println("REMOTE MOVE");
 		                    this.movePiece(movePoint, false, -1); //TEMP NAM assuming fwd
 		                    clearTempData();
 		                    if(outOfMoves()) { 
@@ -238,7 +238,7 @@ public class StateMachine {
 		        		selectPiece(selectedPoint);
 		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		        		if(grid.paikaAllowed(selectedPiece, selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
-		                	System.out.println("REMOTE MOVE");
+		                	//System.out.println("REMOTE MOVE");
 		                    this.movePiece(movePoint, true, 0); //TEMP NAM assuming fwd
 		                    clearTempData();
 		                    if(outOfMoves()) { 
@@ -267,14 +267,14 @@ public class StateMachine {
         if(!grid.isOnGrid(pt)) { return; }
         //figure out if it is a space:0, ally piece:1, or enemy:-1
         int id = grid.getState()[pt.x-1][pt.y-1];
-        System.out.println("Clicked: " + pt.x + ", " + pt.y);
+       // System.out.println("Clicked: " + pt.x + ", " + pt.y);
         
         //if(endFlag) handleRemoteInput();
         switch(s) {
             case PLAYER_SELECT:
             	endFlag = false;
                 if(id == 1) { 
-                	System.out.println("PLAYER_SELECT");
+                	//System.out.println("PLAYER_SELECT");
                     selectPiece(pt);
                     setState(State.MOVE);
                 } //else do nothing
@@ -282,7 +282,7 @@ public class StateMachine {
             case ENEMY_SELECT:
             	endFlag = false;
                 if(id == -1) {
-	                System.out.println("ENEMY_SELECT");
+	                //System.out.println("ENEMY_SELECT");
 		            selectPiece(pt);
 		            setState(State.MOVE);
                 } //else do nothing
@@ -291,7 +291,7 @@ public class StateMachine {
                 if(id == 0) { //empty space
                     Point a = selectedPiece.position();
                     if (grid.isValidMove(a, pt)) {
-                    	System.out.println("MOVE");
+                    	//System.out.println("MOVE");
                         this.movePiece(pt, false, dir);
                         handleChainedMove(dir); //sets next state
                     } else if(grid.paikaAllowed(selectedPiece, a) && grid.isValidPaikaMove(a,pt)){
@@ -312,7 +312,7 @@ public class StateMachine {
                 if(id == 0) {
                     //selectedPiece has been updated since last move
                     if(grid.isValidDoubleMove(selectedPiece.position(), pt, prevPositions, prevDirection)) {
-                    	System.out.println("MOVE AGAIN");
+                    	//System.out.println("MOVE AGAIN");
                         this.movePiece(pt, false, dir);
                         handleChainedMove(dir); //sets next state
                     } else { grid.illegalDoubleMove(); }
@@ -379,7 +379,7 @@ public class StateMachine {
     	clock.restartTimer();
     	grid.repaint();
     	moveString = moveString.substring(0,moveString.length()-3);
-    	System.out.println("MoveString: " + moveString);
+    	//System.out.println("MoveString: " + moveString);
 		try{
 			out.writeObject(moveString);
 			out.flush();

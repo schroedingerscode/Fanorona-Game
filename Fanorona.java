@@ -84,7 +84,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			    socketIn = new ObjectInputStream(acceptSocket.getInputStream());
 			    String welcome = "WELCOME";
 			    socketOut.writeObject(welcome);
-			    System.out.println("Server: " + welcome);
+			    //System.out.println("Server: " + welcome);
 			    socketOut.flush();
 			} catch (IOException e) {}
 			sendGameInfo(socketOut, colSize, rowSize, clientStartingSide, timePerTurn);
@@ -100,7 +100,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 				receiveGameInfo(socketIn);
 				String ready = "READY";
 				socketOut.writeObject(ready);
-				System.out.println("Client: " + ready);
+				//System.out.println("Client: " + ready);
 				socketOut.flush();
 				waitForBegin(socketIn);
 			} catch (IOException e) {}
@@ -137,27 +137,27 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
 		//resize the grid
-		System.out.println("screenWidth: " + screenSize.getWidth());
-		System.out.println("screenHeight: " + screenSize.getHeight());
+		//System.out.println("screenWidth: " + screenSize.getWidth());
+		//System.out.println("screenHeight: " + screenSize.getHeight());
 		
 		xGridAndExcess = (colSize*100)+(BUTTON_SIZE_WIDTH*2+30);
 		yGridAndExcess = (rowSize*100)+100;
-		System.out.println("xGridAndExcess: " + xGridAndExcess);
-		System.out.println("yGridAndExcess: " + yGridAndExcess);
+		//System.out.println("xGridAndExcess: " + xGridAndExcess);
+		//System.out.println("yGridAndExcess: " + yGridAndExcess);
 		
 		if(xGridAndExcess > screenSize.getWidth() || yGridAndExcess > screenSize.getHeight()) {
 			xGridSize = screenSize.getWidth() - ((BUTTON_SIZE_WIDTH*2)+30);
 			yGridSize = screenSize.getHeight() - ((BUTTON_SIZE_HEIGHT*2)+30);
-			System.out.println("xGridSize: " + xGridSize);
-			System.out.println("yGridSize: " + yGridSize);
+			//System.out.println("xGridSize: " + xGridSize);
+			//System.out.println("yGridSize: " + yGridSize);
 			
 			if((xGridAndExcess-screenSize.getWidth()) >= (yGridAndExcess-screenSize.getHeight())) {
 				changeFactor = xGridSize / xGridAndExcess;
-				System.out.println("% change: " + (xGridSize / xGridAndExcess));
+				//System.out.println("% change: " + (xGridSize / xGridAndExcess));
 			}
 			else {
 				changeFactor = yGridSize / yGridAndExcess;
-				System.out.println("% change: " + (yGridSize / yGridAndExcess));
+				//System.out.println("% change: " + (yGridSize / yGridAndExcess));
 			}				
 		}		
 	}
@@ -222,7 +222,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 
             //feed all the points to the state machine
             for(Point p : points) {
-                System.out.println("INSIDE OF FANORONA.JAVA " + p.x + " " + p.y);
+                //System.out.println("INSIDE OF FANORONA.JAVA " + p.x + " " + p.y);
                 String message = stateMachine.run("AIChoice", p);
                 messageBox.setText(message);
             }
@@ -266,7 +266,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     	switch (result) {
     		case JOptionPane.OK_OPTION:
     			networkSetting = (String)networkConfigBox.getSelectedItem();
-    			System.out.println("network: " + networkSetting);
+    			//System.out.println("network: " + networkSetting);
     			break;
     		default:
     			System.exit(0);
@@ -337,7 +337,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     	try{
     		String gameInfoMessage = "INFO " + cols + " " + rows + " " + clientStartingSide + " " + timeout;
 			m_socketOut.writeObject(gameInfoMessage);
-			System.out.println("Server: " + gameInfoMessage);
+			//System.out.println("Server: " + gameInfoMessage);
 			m_socketOut.flush();
 		}
 		catch(IOException ioException){}
@@ -348,11 +348,11 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 	    	String message = "";
 	    	while(!message.equals("READY")) {
 	    		message = (String)m_socketIn.readObject();
-	    		System.out.println("Client: " + message);
+	    		//System.out.println("Client: " + message);
 	    	}
 	    	String response = "BEGIN";
 	    	m_socketOut.writeObject(response);
-	    	System.out.println("Server: " + response);
+	    	//System.out.println("Server: " + response);
 	    	m_socketOut.flush();
     	} catch (Exception e) {}
     }
@@ -362,7 +362,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     		String message = "";
     		while(!message.equals("BEGIN")) {
     			message = (String)m_socketIn.readObject();
-    			System.out.println("Server: " + message);
+    			//System.out.println("Server: " + message);
     		}
     	} catch (Exception e) {}
     }
@@ -373,11 +373,11 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     	try{
     		while(!message.equals("WELCOME")) {
     			message = (String)m_socketIn.readObject();
-    			System.out.println("Server: " + message);
+    			//System.out.println("Server: " + message);
     		}
     		while(!message.startsWith("INFO")) {
     			message = (String)m_socketIn.readObject();
-    			System.out.println("Server: " + message);
+    			//System.out.println("Server: " + message);
     			String[] infoArray = message.split(" ");
     			if(infoArray.length != 5)
     				System.err.println("Bad info received from server.");
@@ -412,8 +412,8 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
             case JOptionPane.OK_OPTION:
             	rowSize = (Integer)rowsBox.getSelectedItem();
             	colSize = (Integer)colsBox.getSelectedItem();
-                System.out.println("rows: " + rowSize);
-                System.out.println("columns: " + colSize);
+               // System.out.println("rows: " + rowSize);
+               // System.out.println("columns: " + colSize);
                 break;
             default:
             	System.exit(0);

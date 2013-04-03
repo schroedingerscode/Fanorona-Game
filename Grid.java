@@ -246,7 +246,7 @@ public class Grid extends JPanel{
             if(p.position().equals(pt)) { return p; }
         }
         //error, should not get here, DEBUG code
-        System.out.println("ERROR: there is no piece at:" + pt.x + ", " + pt.y);
+        System.err.println("ERROR: there is no piece at:" + pt.x + ", " + pt.y);
         System.exit(0);
         return null;//should never get here
     }//}}}

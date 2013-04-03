@@ -80,7 +80,7 @@ public class AI {
 			}
 		}    	
     	
-    	System.out.println("Number of black pawns: " + blackPawnLocations.size());
+    	//System.out.println("Number of black pawns: " + blackPawnLocations.size());
     	
 	    for (Point startLocation: blackPawnLocations){
 	    	
@@ -172,13 +172,13 @@ public class AI {
           value = minMove(nextBoard, 5, maxValue, Integer.MAX_VALUE);
 
           if (value > maxValue) {
-        	System.out.println ("Max value : " + value + " at depth : 0");
+        	//System.out.println ("Max value : " + value + " at depth : 0");
             maxValue = value;
             bestMove = new Move(possibleMove);
           }
         }
 
-        System.out.println ("Move value selected : " + maxValue + " at depth : 0");
+       // System.out.println ("Move value selected : " + maxValue + " at depth : 0");
 
         return bestMove;
       }
@@ -191,8 +191,7 @@ public class AI {
         int value;        
         ArrayList<Move> possibleMoveList = getValidMoves(gameBoard);
 
-        System.out.println ("Max node at depth : " + depth + " with alpha : " + alpha + 
-                            " beta : " + beta);
+        //System.out.println ("Max node at depth : " + depth + " with alpha : " + alpha + " beta : " + beta);
         
         for (Move possibleMove: possibleMoveList){
         	
@@ -203,17 +202,17 @@ public class AI {
 
           if (value > alpha) {
             alpha = value;
-            System.out.println ("Max value : " + value + " at depth : " + depth);
+           // System.out.println ("Max value : " + value + " at depth : " + depth);
           }
 
           if (alpha > beta) {
-        	System.out.println ("Max value with pruning : " + beta + " at depth : " + depth);
+        	//System.out.println ("Max value with pruning : " + beta + " at depth : " + depth);
             return beta;
           }
       
         }
 
-        System.out.println ("Max value selected : " + alpha + " at depth : " + depth);
+       // System.out.println ("Max value selected : " + alpha + " at depth : " + depth);
         return alpha;
       }
       
@@ -225,8 +224,7 @@ public class AI {
 		int value;          
 		ArrayList<Move> possibleMoveList = getValidMoves(gameBoard);
 		
-		System.out.println ("Min node at depth : " + depth + " with alpha : " + alpha + 
-		                    " beta : " + beta);
+		//System.out.println ("Min node at depth : " + depth + " with alpha : " + alpha +  " beta : " + beta);
 		
 		for (Move possibleMove: possibleMoveList){
         	
@@ -236,16 +234,16 @@ public class AI {
 		
 		  if (value < beta) {
 		    beta = value;
-		    System.out.println ("Min value : " + value + " at depth : " + depth);
+		    //System.out.println ("Min value : " + value + " at depth : " + depth);
 		  }
 		
 		  if (beta < alpha) {
-		    System.out.println ("Min value with pruning : " + alpha + " at depth : " + depth);
+		    //System.out.println ("Min value with pruning : " + alpha + " at depth : " + depth);
 		    return alpha;
 		  }
 		}
 		
-		System.out.println ("Min value selected : " + beta + " at depth : " + depth);
+		//System.out.println ("Min value selected : " + beta + " at depth : " + depth);
 		return beta;
 	}    
 
