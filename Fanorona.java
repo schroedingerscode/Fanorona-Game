@@ -87,7 +87,7 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
 			    System.out.println("Server: " + welcome);
 			    socketOut.flush();
 			} catch (IOException e) {}
-			sendGameInfo(socketOut, colSize, rowSize, timePerTurn);
+			sendGameInfo(socketOut, colSize, rowSize, clientStartingSide, timePerTurn);
 			waitForClient(socketIn, socketOut);
 		} else if (networkSetting == "Client") {
 			getClientConfig();
@@ -311,9 +311,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     		serverPort = Integer.parseInt(value);
     	} catch(NumberFormatException e) {}
 		String value = JOptionPane.showInputDialog(null, "What side would you like to start on? Please enter 'W' for White, or 'B' for Black. (Leave Blank for Default 'W')", "Server Starting Side", JOptionPane.QUESTION_MESSAGE);
-		if(value == null || !(value.equals("W") || value.equals("B")))
+		if(value == null || !(value.equals("W") || value.equals("B") || value.equals("")))
 			System.exit(0);
-		clientStartingSide = (value.equals("W"))?"B":"W";
+		if(!value.equals(""))
+			clientStartingSide = (value.equals("W"))?"B":"W";
     }
     
     void getClientConfig() {
@@ -331,10 +332,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     	} catch(NumberFormatException e) {}
     }
     
-    void sendGameInfo(ObjectOutputStream m_socketOut, int cols, int rows, int timeout) {
+    void sendGameInfo(ObjectOutputStream m_socketOut, int cols, int rows, String clientStartingSide, int timeout) {
     	//send game info over the socket
     	try{
-    		String gameInfoMessage = "INFO " + cols + " " + rows + " B " + timeout;
+    		String gameInfoMessage = "INFO " + cols + " " + rows + " " + clientStartingSide + " " + timeout;
 			m_socketOut.writeObject(gameInfoMessage);
 			System.out.println("Server: " + gameInfoMessage);
 			m_socketOut.flush();

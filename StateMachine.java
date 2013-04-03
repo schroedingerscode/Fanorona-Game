@@ -75,12 +75,19 @@ public class StateMachine {
             newGame(p);
             try{out.flush();} catch (Exception e) {}
             clock.restartTimer();
-            if((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("A"))) {
-            	setState(State.ENEMY_SELECT);
-            	handleRemoteInput(false);
-            //} else if(networkSetting.equals("Client") || networkSetting.equals("Server")) {
-	        //	setState(State.PLAYER_SELECT);
-	        } else {
+            if(networkSetting.equals("Server") || networkSetting.equals("Client")) {
+	            if((networkSetting.equals("Client") && clientStartingSide.equals("B"))) {
+	            	setState(State.ENEMY_SELECT);
+	            	handleRemoteInput(false);
+	            } else if((networkSetting.equals("Server") && clientStartingSide.equals("W"))) {
+		        	setState(State.ENEMY_SELECT);
+		        	handleRemoteInput(false);
+		        } else if((networkSetting.equals("Sever") && clientStartingSide.equals("B"))) {
+		        	setState(State.PLAYER_SELECT);
+		        } else {
+		        	setState(State.PLAYER_SELECT);
+		        }
+            } else {
 	        	setState(State.PLAYER_SELECT);
 	        }
         } else if(evtType == "Click") {  
