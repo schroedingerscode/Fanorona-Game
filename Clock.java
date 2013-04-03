@@ -10,7 +10,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class Clock {
-  private Timer timer;
+	private Timer timer;
     private JLabel timeLabel = new JLabel(" ", JLabel.CENTER);
     private int timeRemaining;
     private int originalTime;
@@ -56,6 +56,7 @@ public class Clock {
         
     public void restartTimer() {		
     	timeRemaining = originalTime;
+    	isGameOver = false;
     	if(timerOff)
     		timeLabel.setText("Time left for this turn (seconds): OFF");
     	else {
