@@ -120,11 +120,15 @@ public class StateMachine {
     	if(waitForOKFlag) {
 	    	String okAck = "";
 	        try{okAck = (String)in.readObject();} catch (Exception e) {}
+	        System.out.println(okAck);
     	}
             String coords = "";
             System.out.println("Waiting...");
             try{coords = (String)in.readObject();} catch (Exception e) {}
             System.out.println("ZZZZ: " + coords);
+            if(coords.equals("ILLEGAL") || coords.equals("TIME") || coords.equals("LOSER") || coords.equals("WINNER") || coords.equals("TIE")) {
+            	return;
+            }
             if(!coords.isEmpty()){
             	try {
             		String ok = "OK";
@@ -135,13 +139,28 @@ public class StateMachine {
 	            	String[] coordsMajorArray = coords.split("\\+ ");
 	            	for(int i = 0; i < coordsMajorArray.length; i++) {
 	            		String[] coordsMinorArray = coordsMajorArray[i].split(" ");
-	            		if(coordsMinorArray[0].equals("W") || coordsMinorArray[0].equals("A")) {
+	            		if(coordsMinorArray[0].equals("A")) {
 		            		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
 		            		selectPiece(selectedPoint);
 		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		            		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
 		                    	System.out.println("LARGE REMOTE MOVE");
-		                        this.movePiece(movePoint, false, 0); //TEMP NAM assuming fwd
+		                        this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
+		                        clearTempData();
+		                        if(outOfMoves()) { 
+		                            grid.loseMessage();
+		                            this.run("GameOver", null);
+		                            return;
+		                        }
+		                        movesRemaining--;
+		                    } else { grid.illegalMove(); }
+	            		} else if (coordsMinorArray[0].equals("W")) {
+		            		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+		            		selectPiece(selectedPoint);
+		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+		            		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
+		                    	System.out.println("LARGE REMOTE MOVE");
+		                        this.movePiece(movePoint, false, -1); //TEMP NAM assuming fwd
 		                        clearTempData();
 		                        if(outOfMoves()) { 
 		                            grid.loseMessage();
@@ -171,13 +190,28 @@ public class StateMachine {
 	            	}
 	            } else {
 	            	String[] coordsMinorArray = coords.split(" ");
-	            	if(coordsMinorArray[0].equals("W") || coordsMinorArray[0].equals("A")) {
+	            	if(coordsMinorArray[0].equals("A")) {
 		        		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
 		        		selectPiece(selectedPoint);
 		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
 		        		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
 		                	System.out.println("REMOTE MOVE");
-		                    this.movePiece(movePoint, false, 0); //TEMP NAM assuming fwd
+		                    this.movePiece(movePoint, false, 1); //TEMP NAM assuming fwd
+		                    clearTempData();
+		                    if(outOfMoves()) { 
+		                        grid.loseMessage();
+		                        this.run("GameOver", null);
+		                        return;
+		                    }
+		                    movesRemaining--;
+		                } else { grid.illegalMove(); }
+	            	} else if(coordsMinorArray[0].equals("W")) {
+		        		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+		        		selectPiece(selectedPoint);
+		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
+		        		if (grid.isValidMove(selectedPiece.position(), movePoint)) {
+		                	System.out.println("REMOTE MOVE");
+		                    this.movePiece(movePoint, false, -1); //TEMP NAM assuming fwd
 		                    clearTempData();
 		                    if(outOfMoves()) { 
 		                        grid.loseMessage();
@@ -204,6 +238,8 @@ public class StateMachine {
 	            	}
 	            }
             }
+            if(grid.checkWinningState(out) || clock.gameOver())
+            	setState(State.GAME_OVER);
     }//}}}
     
     private void handleClick(Point pt, int dir) {//{{{
@@ -265,7 +301,7 @@ public class StateMachine {
                 break;
             //the other states do not respond to "Click" events
         }
-        if(grid.checkWinningState() || clock.gameOver())
+        if(grid.checkWinningState(out) || clock.gameOver())
         	setState(State.GAME_OVER);
     }//}}}
 

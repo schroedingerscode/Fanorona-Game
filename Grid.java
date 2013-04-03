@@ -8,6 +8,7 @@ import java.awt.geom.Line2D;
 import javax.swing.*;
 import java.util.*;
 import java.util.List;
+import java.io.*;
 
 public class Grid extends JPanel{
     private List<Piece> pieces;
@@ -181,7 +182,7 @@ public class Grid extends JPanel{
         return state;
     }//}}}
 	
-	boolean checkWinningState(){//{{{
+	boolean checkWinningState(ObjectOutputStream out){//{{{
 		int white = 0;
 		int black = 0;
 		for(Piece p : pieces) {
@@ -191,10 +192,22 @@ public class Grid extends JPanel{
 				black++;
 		}
 		if(white <= 0) {
+			try {
+				String loseString = "LOSER";
+				out.flush();
+				out.writeObject(loseString);
+				out.flush();
+			} catch (Exception e) {}
 			loseMessage();
 			return true;
 		}
 		else if(black <= 0) {
+			try {
+				String winString = "WINNER";
+				out.flush();
+				out.writeObject(winString);
+				out.flush();
+			} catch (Exception e) {}
 			winMessage();
 			return true;
 		}
