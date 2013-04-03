@@ -173,7 +173,7 @@ public class StateMachine {
 	            			Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
 		            		selectPiece(selectedPoint);
 		            		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
-		            		if(grid.paikaAllowed(selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
+		            		if(grid.paikaAllowed(selectedPiece, selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
 		                    	System.out.println("LARGE REMOTE MOVE");
 		                        this.movePiece(movePoint, true, 0); //TEMP NAM assuming fwd
 		                        clearTempData();
@@ -224,7 +224,7 @@ public class StateMachine {
 	            		Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
 		        		selectPiece(selectedPoint);
 		        		Point movePoint = new Point(Integer.parseInt(coordsMinorArray[3]), Integer.parseInt(coordsMinorArray[4]));
-		        		if(grid.paikaAllowed(selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
+		        		if(grid.paikaAllowed(selectedPiece, selectedPoint) && grid.isValidPaikaMove(selectedPoint,movePoint)){
 		                	System.out.println("REMOTE MOVE");
 		                    this.movePiece(movePoint, true, 0); //TEMP NAM assuming fwd
 		                    clearTempData();
@@ -275,7 +275,7 @@ public class StateMachine {
                     	System.out.println("MOVE");
                         this.movePiece(pt, false, dir);
                         handleChainedMove(dir); //sets next state
-                    } else if(grid.paikaAllowed(a) && grid.isValidPaikaMove(a,pt)){
+                    } else if(grid.paikaAllowed(selectedPiece, a) && grid.isValidPaikaMove(a,pt)){
                         this.movePiece(pt, true, dir);
                         endTurn();
                     } else { grid.illegalMove(); }
