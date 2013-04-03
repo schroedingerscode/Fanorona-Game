@@ -412,7 +412,7 @@ public class StateMachine {
             } else {
                 grid.multiTurnMessage();
             }
-            selectPiece(selectedPiece.position()); //to rehighlight
+            try{selectPiece(selectedPiece.position());} catch (Exception e) {} //to rehighlight
             setState(State.MOVE_AGAIN); 
         } else {
             endTurn();
