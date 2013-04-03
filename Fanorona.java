@@ -310,6 +310,10 @@ public class Fanorona extends JPanel implements ActionListener, MouseListener {
     			System.exit(0);
     		serverPort = Integer.parseInt(value);
     	} catch(NumberFormatException e) {}
+		String value = JOptionPane.showInputDialog(null, "What side would you like to start on? Please enter 'W' for White, or 'B' for Black. (Leave Blank for Default 'W')", "Server Starting Side", JOptionPane.QUESTION_MESSAGE);
+		if(value == null || !(value.equals("W") || value.equals("B")))
+			System.exit(0);
+		clientStartingSide = (value.equals("W"))?"B":"W";
     }
     
     void getClientConfig() {
