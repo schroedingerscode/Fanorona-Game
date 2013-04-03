@@ -186,6 +186,11 @@ public class StateMachine {
 		                    } else { 
 		                    	 grid.illegalMove();
 		                    }
+	            		} else if (coordsMinorArray[0].equals("S")) {
+	            			Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+		            		selectPiece(selectedPoint);
+		            		sacrificePiece(selectedPoint);
+		            		clearTempData();
 	            		}
 	            	}
 	            } else {
@@ -235,7 +240,12 @@ public class StateMachine {
 		                    }
 		                    movesRemaining--;
 		                } else { grid.illegalMove(); }
-	            	}
+	            	} else if (coordsMinorArray[0].equals("S")) {
+            			Point selectedPoint = new Point(Integer.parseInt(coordsMinorArray[1]), Integer.parseInt(coordsMinorArray[2]));
+	            		selectPiece(selectedPoint);
+	            		sacrificePiece(selectedPoint);
+	            		clearTempData();
+            		}
 	            }
             }
             if(grid.checkWinningState(out) || clock.gameOver())
@@ -352,7 +362,7 @@ public class StateMachine {
                 grid.repaint();
 				setState(State.PLAYER_SELECT);
 			} else {
-                grid.killSacrifices(false);
+                grid.killSacrifices(true);
                 grid.repaint();
 				setState(State.ENEMY_SELECT);
 			}
@@ -360,6 +370,7 @@ public class StateMachine {
     	clock.restartTimer();
     	grid.repaint();
     	moveString = moveString.substring(0,moveString.length()-3);
+    	System.out.println("MoveString: " + moveString);
 		try{
 			out.writeObject(moveString);
 			out.flush();
@@ -421,7 +432,7 @@ public class StateMachine {
         deselectPiece();
         selectedPiece = grid.getPieceAt(pt);
         selectedPiece.sacrifice();
-        moveString += ("S" + pt.x + " " + pt.y);
+        moveString += ("S " + pt.x + " " + pt.y + " + ");
         grid.repaint();
     }//}}}
 
