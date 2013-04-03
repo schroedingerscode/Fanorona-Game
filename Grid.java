@@ -191,7 +191,7 @@ public class Grid extends JPanel{
 			else
 				black++;
 		}
-		if(invert) {
+		if(!invert) {
 			if(white <= 0) {
 				try {
 					String loseString = "LOSER";

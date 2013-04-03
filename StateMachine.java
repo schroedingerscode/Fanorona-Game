@@ -256,7 +256,7 @@ public class StateMachine {
             		}
 	            }
             }
-            Boolean invert = ((networkSetting.equals("Client") && clientStartingSide.equals("W")) || (networkSetting.equals("Server") && clientStartingSide.equals("W")))?true:false;
+            Boolean invert = ((networkSetting.equals("Client") && clientStartingSide.equals("B")) || (networkSetting.equals("Server") && clientStartingSide.equals("W")))?true:false;
             if(grid.checkWinningState(out, invert) || clock.gameOver())
             	setState(State.GAME_OVER);
     }//}}}
