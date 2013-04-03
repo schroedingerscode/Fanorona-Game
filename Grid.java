@@ -373,10 +373,16 @@ public class Grid extends JPanel{
         return isOnGrid(b) && isAdjacent(a,b) && isUnique(b);
     }
 
-    public Boolean paikaAllowed(Point a) {
+    public Boolean paikaAllowed(Piece a, Point b) {
         //allowed if no capture moves can be made
-        List<Point> l = getValidCaptureMoves(a);
-        return (l.size() <= 0)?true:false;
+    	Boolean thisColorsTurn = a.isPlayer();
+    	for(Piece p : pieces) {
+    		if(p.isPlayer() == thisColorsTurn){
+    		List<Point> l = getValidCaptureMoves(p.position());
+    		if(l.size() > 0) return false;
+    		}
+    	}
+        return true;
     }
 
     public List<Point> getValidCaptureMoves(Point a) {//{{{
