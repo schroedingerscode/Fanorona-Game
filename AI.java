@@ -290,7 +290,7 @@ public class AI {
 		else possibleMoveList = getValidBlackMoves(gameBoard);
 
        // System.out.println ("Max node at depth : " + depth + " with alpha : " + alpha + 
-                            " beta : " + beta);
+                         //   " beta : " + beta);
         
         for (Move possibleMove: possibleMoveList){
         	
@@ -327,7 +327,7 @@ public class AI {
 		else possibleMoveList = getValidBlackMoves(gameBoard);
 		
 		//System.out.println ("Min node at depth : " + depth + " with alpha : " + alpha + 
-		                    " beta : " + beta);
+		                   // " beta : " + beta);
 		
 		for (Move possibleMove: possibleMoveList){
         	
